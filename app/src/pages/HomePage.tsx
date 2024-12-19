@@ -3,7 +3,7 @@ import { Upload, ArrowRight, Zap, Rocket } from 'lucide-react'
 
 
 export default function HomePage() {
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue, setInputValue] = useState<string>('')
 
   // TODO: Add pages for Documentation, Pricing, and Onboard
   return (

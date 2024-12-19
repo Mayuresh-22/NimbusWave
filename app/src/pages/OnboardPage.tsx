@@ -3,13 +3,13 @@ import { ArrowRight, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 
 export default function OnboardPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false)
 
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [registerName, setRegisterName] = useState('')
-  const [registerEmail, setRegisterEmail] = useState('')
-  const [registerPassword, setRegisterPassword] = useState('')
+  const [loginEmail, setLoginEmail] = useState<string>('')
+  const [loginPassword, setLoginPassword] = useState<string>('')
+  const [registerName, setRegisterName] = useState<string>('')
+  const [registerEmail, setRegisterEmail] = useState<string>('')
+  const [registerPassword, setRegisterPassword] = useState<string>('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

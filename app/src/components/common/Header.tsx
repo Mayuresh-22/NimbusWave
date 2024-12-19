@@ -4,8 +4,8 @@ import { Link, useLocation } from 'react-router'
 
 export function Header() {
   const location = useLocation()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [onOnboardPage, setOnOnboardPage] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
+  const [onOnboardPage, setOnOnboardPage] = useState<boolean>(false)
 
   useEffect(() => {
     console.log(location.pathname);
