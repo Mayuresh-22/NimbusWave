@@ -1,8 +1,5 @@
-'use client'
-
 import { useState } from 'react'
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
-import { Link } from 'react-router'
 
 export default function OnboardPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -21,25 +18,16 @@ export default function OnboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white">
-      {/* Header */}
-      <header className="border-b border-gray-900 bg-black/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">NimbusWave</span>
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex flex-col text-white">
+      <main className="flex-1 flex items-center justify-center px-4 py-12 bg-gradient-to-tr from-black via-gray-900 to-black">
         <div className="w-full max-w-md">
-          <div className="bg-mono-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
             {/* Tabs */}
-            <div className="flex border-b border-mono-800">
+            <div className="flex border-b border-gray-800">
               <button
                 className={`flex-1 py-4 text-sm font-medium ${
                   activeTab === 'login'
-                    ? 'bg-mono-700 text-white'
+                    ? 'bg-gray-700 text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
                 onClick={() => setActiveTab('login')}
@@ -49,7 +37,7 @@ export default function OnboardPage() {
               <button
                 className={`flex-1 py-4 text-sm font-medium ${
                   activeTab === 'register'
-                    ? 'bg-mono-700 text-white'
+                    ? 'bg-gray-700 text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
                 onClick={() => setActiveTab('register')}
@@ -73,7 +61,7 @@ export default function OnboardPage() {
                         required
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 text-sm bg-gray-900/60 rounded-lg border border-mono-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                        className="w-full px-4 py-2 pl-10 text-sm bg-gray-900/60 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
                         placeholder="Enter your email"
                       />
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -90,7 +78,7 @@ export default function OnboardPage() {
                         required
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 pr-10 text-sm bg-gray-900/60 rounded-lg border border-mono-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                        className="w-full px-4 py-2 pl-10 pr-10 text-sm bg-gray-900/60 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
                         placeholder="Enter your password"
                       />
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -121,7 +109,7 @@ export default function OnboardPage() {
                         required
                         value={registerName}
                         onChange={(e) => setRegisterName(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 text-sm bg-gray-900/60 rounded-lg border border-mono-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                        className="w-full px-4 py-2 pl-10 text-sm bg-gray-900/60 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
                         placeholder="Enter your name"
                       />
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -138,7 +126,7 @@ export default function OnboardPage() {
                         required
                         value={registerEmail}
                         onChange={(e) => setRegisterEmail(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 text-sm bg-gray-900/60 rounded-lg border border-mono-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                        className="w-full px-4 py-2 pl-10 text-sm bg-gray-900/60 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
                         placeholder="Enter your email"
                       />
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -155,7 +143,7 @@ export default function OnboardPage() {
                         required
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 pr-10 text-sm bg-gray-900/60 rounded-lg border border-mono-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                        className="w-full px-4 py-2 pl-10 pr-10 text-sm bg-gray-900/60 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent"
                         placeholder="Create a password"
                       />
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />

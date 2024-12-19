@@ -1,68 +1,16 @@
-'use client'
-
 import { useState } from 'react'
-import { Upload, ArrowRight, Menu, X, Zap, Rocket } from 'lucide-react'
-import { Link } from 'react-router'
+import { Upload, ArrowRight, Zap, Rocket } from 'lucide-react'
 
-export default function LandingPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+export default function HomePage() {
   const [inputValue, setInputValue] = useState('')
 
   // TODO: Add pages for Documentation, Pricing, and Onboard
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
-      {/* Header */}
-      <header className="fixed top-0 w-full border-b border-gray-900 bg-gray-900/30 backdrop-blur-sm z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">
-              NimbusWave
-            </span>
-          </Link>
-          
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-900"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/docs" className="text-sm hover:text-gray-300 transition-colors">
-              Documentation
-            </Link>
-            <Link to="/pricing" className="text-sm hover:text-gray-300 transition-colors">
-              Pricing
-            </Link>
-            <Link 
-              to="/onboard"
-              className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Login
-            </Link>
-          </nav>
-        </div>
-
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-900 bg-black px-4 py-4">
-            <nav className="flex flex-col space-y-4">
-              <Link to="/docs" className="text-sm hover:text-gray-300 transition-colors">
-                Documentation
-              </Link>
-              <Link to="/pricing" className="text-sm hover:text-gray-300 transition-colors">
-                Pricing
-              </Link>
-              <Link to="/onboard" className="text-sm hover:text-gray-300 transition-colors">
-                Login
-              </Link>
-            </nav>
-          </div>
-        )}
-      </header>
-
       <main className="flex-1 pt-16">
         {/* Hero section */}
-        <section className="container mx-auto px-4 py-20 text-center bg-gradient-to-r from-black via-gray-900 relative overflow-hidden">
+        <section className="container mx-auto px-4 py-20 text-center bg-gradient-to-r from-black via-gray-900 to-black relative overflow-hidden">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 relative">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-300 to-gray-500">
               Deploy at the Speed of Thought
