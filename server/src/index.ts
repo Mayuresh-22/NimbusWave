@@ -1,9 +1,17 @@
 import { Hono } from 'hono'
+import APIEndpoint from './api';
+import AuthMiddleware from './middlewares/auth';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+export interface Bindings extends CloudflareBindings {
+  GROQ_API_KEY: string;
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
+}
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.use("/*", AuthMiddleware);
+
+app.route('/', APIEndpoint);
 
 export default app
