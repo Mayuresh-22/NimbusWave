@@ -3,6 +3,9 @@ import { Send, Upload, Stars, UserRound } from 'lucide-react'
 import deploy from '../services/deploy'
 import Alert from '../components/common/Alert'
 import { useNavigate, useParams } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux'
+import { setProject } from '../store/projectSlice'
+import { RootState } from '../store/store'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -10,19 +13,21 @@ interface Message {
 }
 
 export default function ChatPage() {
+  const { projectId } = useParams() as { projectId: string }
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const chatEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
       content: 'Hello! I can help you deploy your project. You can start by uploading your project files or asking me questions about deployment.'
     }
   ])
-  const { projectId } = useParams() as { projectId: string }
-  const navigate = useNavigate()
-  const chatEndRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [alert, setAlert] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const [input, setInput] = useState('')
   const [isDragging, setIsDragging] = useState(false)
+  const project = useSelector((state: RootState) => state.project.project)
   const [zipProjectFiles, setZipProjectFiles] = useState<File | null>(null)
   const [projectName, setProjectName] = useState<string>('')
   const [projectFramework, setProjectFramework] = useState<string>('')
@@ -83,10 +88,14 @@ export default function ChatPage() {
     (async () => {
       if (!projectId) {
         const response = await deploy.createNewProject();
-        if (response.status === "error") {
+        if (!response) {
+          setAlert({ type: 'error', message: 'Failed to create a new project. Please try again later.' })
+          return;
+        } else if (response.status === "error") {
           setAlert({ type: 'error', message: response.message })
           return;
         }
+        dispatch(setProject({projectID: response.data.project_id, chatId: response.data.chat_id}))
         navigate(`/${response.data.project_id}`)
       }
     })()
