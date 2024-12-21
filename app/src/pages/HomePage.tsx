@@ -1,11 +1,18 @@
 import { useState } from 'react'
-import { Upload, ArrowRight, Zap, Rocket } from 'lucide-react'
+import { Upload, ArrowRight, Zap, Rocket, Stars } from 'lucide-react'
+import { useNavigate } from 'react-router'
+import { useSelector } from 'react-redux'
+import { RootState } from '../store/store'
 
 
 export default function HomePage() {
   const [inputValue, setInputValue] = useState<string>('')
+  const navigate = useNavigate()
+  const isUserLoggedIn = useSelector((state: RootState) => state.user.isAuthenticated)
 
-  // TODO: Add pages for Documentation, Pricing, and Onboard
+  const navigateTo = () => {
+    navigate(isUserLoggedIn ? '/deploy' : '/onboard')
+  }
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       <main className="flex-1 pt-16">
@@ -32,7 +39,7 @@ export default function HomePage() {
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 { icon: Upload, title: "1. Upload Your Build", description: "Drop your dist folder or select it from your computer" },
-                { icon: Zap, title: "2. AI Copilot", description: "Our AI navigate you through the deployment process" },
+                { icon: Stars, title: "2. AI Copilot", description: "Our AI navigate you through the deployment process" },
                 { icon: Rocket, title: "3. Global Deployment", description: "Your app is instantly deployed to our global edge network" }
               ].map((step, index) => (
                 <div key={index} className="flex flex-col items-center text-center space-y-4 group">
@@ -62,7 +69,7 @@ export default function HomePage() {
               <p className="text-gray-400 text-center">
                 Drag and drop your dist folder or click to browse
               </p>
-              <button className="px-6 py-3 text-sm font-medium border border-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+              <button onClick={navigateTo} className="px-6 py-3 text-sm font-medium border border-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                 Select Folder
               </button>
             </div>
@@ -83,7 +90,7 @@ export default function HomePage() {
             />
             <Zap className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           </div>
-          <button className="px-6 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center">
+          <button onClick={navigateTo} className="px-6 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center">
             <Rocket className="mr-2 h-4 w-4" />
             Deploy with AI
           </button>
