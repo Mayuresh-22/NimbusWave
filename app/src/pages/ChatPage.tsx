@@ -51,7 +51,7 @@ export default function ChatPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'I understand you want to deploy your project. Could you provide more details about your application stack?'
+        content: 'Could you provide more details about your application'
       }])
     }, 1000)
   }
