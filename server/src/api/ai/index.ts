@@ -19,5 +19,5 @@ AIEndpoint.post("/chat", zValidator("json", ChatEndpointRequest), async (c) => {
     .getLLMResponse(body.message, []);
   return c.json(response);
 });
-
+//hello
 export default AIEndpoint;
