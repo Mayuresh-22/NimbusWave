@@ -5,7 +5,7 @@ import { Bindings } from '..';
 class Supabase {
   private supabase: SupabaseClient | null = null;
 
-  constructor(c: Context<{ Bindings: Bindings }>) {
+  constructor(c: Context<{ Bindings: Bindings, Variables: any }>) {
     this.supabase = createClient(
       c.env.SUPABASE_URL,
       c.env.SUPABASE_ANON_KEY
