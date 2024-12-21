@@ -1,10 +1,11 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import AppNavigator from './navigators/appNavigator.tsx'
+import Navigator from './navigators/navigator.tsx'
+import { Provider } from 'react-redux'
+import store from './store/store.ts'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AppNavigator />
-  </StrictMode>,
+  <Provider store={store}>
+    <Navigator />
+  </Provider>
 )

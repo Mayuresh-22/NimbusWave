@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../store/store'
 
 export function Header() {
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const [onOnboardPage, setOnOnboardPage] = useState<boolean>(false)
+  const isUserLoggedIn = useSelector((state: RootState) => state.user.isAuthenticated)
 
   useEffect(() => {
-    console.log(location.pathname);
-    
     setOnOnboardPage(location.pathname === '/onboard')
   }, [location])
 
@@ -36,11 +37,16 @@ export function Header() {
           <Link to="/pricing" className="text-sm hover:text-gray-300 transition-colors">
             Pricing
           </Link>
-          {!onOnboardPage &&  <Link
+          {!onOnboardPage && !isUserLoggedIn ? <Link
             to="/onboard"
             className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
           >
             Login
+          </Link> : <Link
+            to="/dashboard"
+            className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Dashboard
           </Link>}
         </nav>
       </div>
@@ -54,8 +60,10 @@ export function Header() {
             <Link to="/pricing" className="text-sm hover:text-gray-300 transition-colors">
               Pricing
             </Link>
-            {!onOnboardPage && <Link to="/onboard" className="text-sm hover:text-gray-300 transition-colors">
+            {!onOnboardPage && !isUserLoggedIn ? <Link to="/onboard" className="text-sm hover:text-gray-300 transition-colors">
               Login
+            </Link> : <Link to="/onboard" className="text-sm hover:text-gray-300 transition-colors">
+              Dashboard
             </Link>}
           </nav>
         </div>
