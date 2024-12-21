@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import AIEndpoint from "./ai";
 import { Bindings } from "..";
+import UserEndpoint from "./user";
 
 const APIEndpoint = new Hono<{ Bindings: Bindings }>();
 
@@ -12,8 +13,9 @@ APIEndpoint.get("/", (c) => {
 });
 
 /*
-  Mount the AIEndpoint to the APIEndpoint
+  Mount all the routes to api/
 */
 APIEndpoint.route("/api", AIEndpoint);
+APIEndpoint.route("/api", UserEndpoint);
 
 export default APIEndpoint;

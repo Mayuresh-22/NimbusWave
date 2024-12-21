@@ -17,7 +17,7 @@ class Supabase {
       if (!this.supabase) {
         throw new Error("Supabase client not initialized");
       }
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const { data: { user } } = await this.supabase.auth.getUser(token)
       return user;
     } catch (error) {
       return null;
