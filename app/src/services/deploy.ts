@@ -8,7 +8,7 @@ class DeploymentService extends BaseService {
 
   async createNewProject() {
     try {
-      const response = await this.server.post('/projects', {
+      const response = await this.server.post('/api/project', {
         default: true
       });
       return response.data;
