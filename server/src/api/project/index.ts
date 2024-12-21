@@ -18,8 +18,11 @@ const ProjectEndpoint = new Hono<{ Bindings: Bindings, Variables: AuthContext }>
 
 ProjectEndpoint.post("/project", zValidator("json", CreateProjectReq), async (c) => {
   const body = await c.req.json();
-  // check if user has sufficient credits
-  console.log(c.var.user.id);
+  /*
+    This route creates a new project and a chat window
+    associated with the project. The project is associated
+    with the user who created it.
+  */
 
   const userResult = await c.env.DB.prepare(
     "SELECT project_credits FROM users WHERE id = ?"
@@ -39,11 +42,6 @@ ProjectEndpoint.post("/project", zValidator("json", CreateProjectReq), async (c)
     }, 200);
   }
 
-  /*
-    This route creates a new project and a chat window
-    associated with the project. The project is associated
-    with the user who created it.
-  */
   const projectId = v4();
   const chatId = v4();
 

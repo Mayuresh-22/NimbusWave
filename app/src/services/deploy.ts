@@ -17,6 +17,15 @@ class DeploymentService extends BaseService {
       return null;
     }
   }
+
+  async getProjecrt(projectId: string, withChats: boolean = false) {
+    try {
+      const response = await this.server.get(`/api/project?id=${projectId}&withChats=${withChats}`);
+      return response.data;
+    } catch (error) {
+      return null
+    }
+  }
 }
 
 export default new DeploymentService();

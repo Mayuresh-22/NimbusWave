@@ -96,10 +96,23 @@ export default function ChatPage() {
           return;
         }
         dispatch(setProject({projectID: response.data.project_id, chatId: response.data.chat_id}))
-        navigate(`/${response.data.project_id}`)
+        navigate(`${response.data.project_id}`)
+      } else if (projectId && project?.projectID !== projectId) {
+        const response = await deploy.getProjecrt(projectId);
+        if (!response) {
+          setAlert({ type: 'error', message: 'Failed to fetch project details. Please try again later.' })
+          return;
+        } else if (response.status === "error") {
+          setAlert({ type: 'error', message: response.message })
+          return;
+        }
+        setProjectName(response.data.project_name)
+        setProjectFramework(response.data.project_framework)
+        setProjectDescription(response.data.project_description)
+        dispatch(setProject({projectID: response.data.project_id, chatId: response.data.chat_id}))
       }
     })()
-  }, [])
+  }, [projectId])
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
@@ -110,7 +123,7 @@ export default function ChatPage() {
         <div className="container max-w-4xl mx-auto px-4 h-[calc(100vh-4rem)] flex flex-col">
           {/* Project name */}
           <div className="py-4 border-b border-gray-900">
-            <h1 className="text-xl font-semibold">My Project</h1>
+            <h1 className="text-xl font-semibold">Project name: {projectName}</h1>
           </div>
 
           {/* Chat area */}
