@@ -78,7 +78,7 @@ export default function HomePage() {
       </main>
 
       {/* AI-powered input */}
-      <div className="fixed bottom-10 left-0 right-0 max-w-md sm:max-w-xl justify-center items-center mx-auto bg-gray-900 border-t border-gray-800 rounded-full p-4">
+      <div className="z-50 fixed bottom-10 left-0 right-0 max-w-md sm:max-w-xl justify-center items-center mx-auto bg-gray-900 border-t border-gray-800 rounded-full p-4">
         <div className="container mx-auto max-w-3xl flex items-center gap-4">
           <div className="flex-1 relative">
             <input
