@@ -1,7 +1,7 @@
-import { Hono } from 'hono'
-import APIEndpoint from './api';
-import AuthMiddleware from './middlewares/auth';
-import { cors } from 'hono/cors';
+import { Hono } from "hono";
+import APIEndpoint from "./api";
+import AuthMiddleware from "./middlewares/auth";
+import { cors } from "hono/cors";
 
 /*
   This is the custom binding interface to include the .dev.vars
@@ -21,19 +21,22 @@ const app = new Hono<{ Bindings: Bindings }>();
 /*
   This middlewares will be applied to all routes.
 */
-app.use("/*", cors({
-  origin: '*',
-  allowHeaders: ['Authorization', 'Content-Type', 'Accept'],
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
-  exposeHeaders: ['Content-Length'],
-  maxAge: 600,
-  credentials: true,
-}));
+app.use(
+  "/*",
+  cors({
+    origin: "*",
+    allowHeaders: ["Authorization", "Content-Type", "Accept"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  }),
+);
 app.use("/*", AuthMiddleware);
 
 /*
   This is the route that will be used to handle all the requests.
 */
-app.route('/', APIEndpoint);
+app.route("/", APIEndpoint);
 
-export default app
+export default app;

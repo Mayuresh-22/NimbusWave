@@ -7,11 +7,14 @@ export type AuthContext = {
   user: User;
 };
 
-const AuthMiddleware = createMiddleware<{Bindings: Bindings, Variables: AuthContext}>(async (c, next) => {
+const AuthMiddleware = createMiddleware<{
+  Bindings: Bindings;
+  Variables: AuthContext;
+}>(async (c, next) => {
   try {
     const userAuthenticated = await new Supabase(c).getUser(
-      c.req.header("Authorization")?.split(" ")[1] || ""
-    )
+      c.req.header("Authorization")?.split(" ")[1] || "",
+    );
     if (!userAuthenticated) {
       return c.json({ error: "Unauthorized" }, 401);
     }

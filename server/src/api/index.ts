@@ -7,8 +7,8 @@ import ProjectEndpoint from "./project";
 const APIEndpoint = new Hono<{ Bindings: Bindings }>();
 
 /*
-  * This is the entry point for the API module
-*/
+ * This is the entry point for the API module
+ */
 APIEndpoint.get("/", (c) => {
   return c.json({ message: "Hello, API!" });
 });

@@ -43,25 +43,31 @@ KEEP user in loop don't let user ask whats next.
     this.groqInstance = new Groq({ apiKey: apiKey });
   }
 
-  async getLLMResponse(message: string, context: ChatCompletionMessageParam[]): Promise<LLMResponse> {
+  async getLLMResponse(
+    message: string,
+    context: ChatCompletionMessageParam[],
+  ): Promise<LLMResponse> {
     console.log("context: ", context);
-    
-    const messageArray: ChatCompletionMessageParam[] = [{
-      "role": "system",
-      "content": this.llmSysPrompt
-    }, ...context]
+
+    const messageArray: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: this.llmSysPrompt,
+      },
+      ...context,
+    ];
     messageArray.push({
-      "role": "user",
-      "content": message
+      role: "user",
+      content: message,
     });
     const chatCompletion = await this.groqInstance.chat.completions.create({
-      "messages": messageArray,
-      "model": this.llm,
-      "temperature": 1,
-      "max_tokens": this.maxTokens,
-      "top_p": 1,
-      "stream": false,
-      "stop": null
+      messages: messageArray,
+      model: this.llm,
+      temperature: 1,
+      max_tokens: this.maxTokens,
+      top_p: 1,
+      stream: false,
+      stop: null,
     });
 
     console.log(chatCompletion.choices[0].message.content);
@@ -69,7 +75,7 @@ KEEP user in loop don't let user ask whats next.
       return {
         message: "I'm sorry, I don't understand. Can you please rephrase?",
         tool: null,
-        thought: ""
+        thought: "",
       };
     }
 
