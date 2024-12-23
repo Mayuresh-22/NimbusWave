@@ -121,7 +121,6 @@ class Supabase {
       if (!session) {
         throw new Error("No session found");
       }
-      console.log(session.data.session);
       return session.data.session;
     } catch (error) {
       return null;

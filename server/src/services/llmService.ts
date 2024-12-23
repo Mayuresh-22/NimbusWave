@@ -68,6 +68,9 @@ KEEP user in loop don't let user ask whats next.
       top_p: 1,
       stream: false,
       stop: null,
+      response_format: {
+        "type": "json_object"
+      }
     });
 
     console.log(chatCompletion.choices[0].message.content);

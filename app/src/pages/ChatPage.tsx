@@ -274,12 +274,12 @@ export default function ChatPage() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && initDeployment()}
+                onKeyPress={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Let's start deploying your project..."
                 className="flex-1 px-4 py-3 text-sm bg-gray-900 rounded-full border border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent"
               />
               <button
-                onClick={initDeployment}
+                onClick={handleSend}
                 disabled={!input.trim()}
                 className="px-4 py-3 text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >

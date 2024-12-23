@@ -6,9 +6,9 @@ import { Bindings } from "../..";
 import llmService from "../../services/llmService";
 
 const ChatEndpointRequest = z.object({
-  message: z.string(),
-  chat_id: z.string(),
-  project_id: z.string(),
+  message: z.string().nonempty(),
+  chat_id: z.string().nonempty(),
+  project_id: z.string().nonempty(),
 });
 
 const AIEndpoint = new Hono<{ Bindings: Bindings }>().basePath("/ai");

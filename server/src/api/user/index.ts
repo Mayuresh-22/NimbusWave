@@ -6,10 +6,10 @@ import { Bindings } from "../..";
 import llmService from "../../services/llmService";
 
 const UserEndpointRequest = z.object({
-  email: z.string().email(),
-  uid: z.string(),
+  email: z.string().nonempty().email(),
+  uid: z.string().nonempty(),
   meta_data: z.object({
-    name: z.string().optional(),
+    name: z.string().nonempty().optional(),
   }),
 });
 
