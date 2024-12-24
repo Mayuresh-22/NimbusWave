@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 import supabase from '../services/supabase'
 import { useLocation, useNavigate } from 'react-router'
-import user from '../services/user'
 import { AuthError } from '@supabase/supabase-js'
+import user from '../services/user'
 import Alert from '../components/common/Alert'
 
 export default function OnboardPage() {
