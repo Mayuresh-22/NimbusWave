@@ -3,15 +3,18 @@ import { Menu, X } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store/store'
+import { NAVBAR_LINKS, NavbarLink } from '../../contants'
 
 export function Header() {
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const [onOnboardPage, setOnOnboardPage] = useState<boolean>(false)
   const isUserLoggedIn = useSelector((state: RootState) => state.user.isAuthenticated)
+  const [navbarLinks, setNavbarLinks] = useState<NavbarLink[]>([])
 
   useEffect(() => {
     setOnOnboardPage(location.pathname === '/onboard')
+    setNavbarLinks(NAVBAR_LINKS[location.pathname] || [])
   }, [location])
 
   return (
@@ -31,12 +34,11 @@ export function Header() {
         </button>
 
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/docs" className="text-sm hover:text-gray-300 transition-colors">
-            Documentation
-          </Link>
-          <Link to="/pricing" className="text-sm hover:text-gray-300 transition-colors">
-            Pricing
-          </Link>
+          {navbarLinks.map((link, index) => (
+            <Link key={index} to={link.path} className="text-sm hover:text-gray-300 transition-colors">
+              {link.title}
+            </Link>
+          ))}
           {!onOnboardPage && !isUserLoggedIn ? <Link
             to="/onboard"
             className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
@@ -54,12 +56,11 @@ export function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-gray-900 bg-black px-4 py-4">
           <nav className="flex flex-col space-y-4">
-            <Link to="/docs" className="text-sm hover:text-gray-300 transition-colors">
-              Documentation
-            </Link>
-            <Link to="/pricing" className="text-sm hover:text-gray-300 transition-colors">
-              Pricing
-            </Link>
+            {navbarLinks.map((link, index) => (
+              <Link key={index} to={link.path} className="text-sm hover:text-gray-300 transition-colors">
+                {link.title}
+              </Link>
+            ))}
             {!onOnboardPage && !isUserLoggedIn ? <Link to="/onboard" className="text-sm hover:text-gray-300 transition-colors">
               Login
             </Link> : <Link to="/onboard" className="text-sm hover:text-gray-300 transition-colors">
