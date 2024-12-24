@@ -3,6 +3,7 @@ import HomePage from "../pages/HomePage"
 import App from "../App"
 import ChatPage from "../pages/ChatPage"
 import OnboardPage from "../pages/OnboardPage"
+import DashboardPage from "../pages/DashboardPage"
 
 
 export default function AppNavigator() {
@@ -11,6 +12,7 @@ export default function AppNavigator() {
       <Routes>
         <Route path="" element={<App />}>
           <Route path="" element={<HomePage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/onboard" element={<OnboardPage />} />  {/* TODO: Remove this line */}
           <Route path="/deploy/:projectId?" element={<ChatPage />} />
           <Route path="/about" element={<h1>About</h1>} />

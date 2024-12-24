@@ -3,6 +3,7 @@ import { Upload, ArrowRight, Zap, Rocket, Stars } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
+import { AI_CHAT, DASHBOARD, ONBOARD } from '../contants'
 
 
 export default function HomePage() {
@@ -10,8 +11,9 @@ export default function HomePage() {
   const navigate = useNavigate()
   const isUserLoggedIn = useSelector((state: RootState) => state.user.isAuthenticated)
 
-  const navigateTo = () => {
-    navigate(isUserLoggedIn ? '/deploy' : '/onboard')
+  const navigateTo = (to?: string) => {
+    if (to) return navigate(to)
+    navigate(isUserLoggedIn ? AI_CHAT.path : ONBOARD.path)
   }
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
@@ -26,7 +28,7 @@ export default function HomePage() {
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto relative z-10">
             Zero-onfig AI-powered edge deployment platform that takes your JS/TS apps from local to global in seconds
           </p>
-          <button className="inline-flex items-center px-6 py-3 text-base font-medium text-black bg-white rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors relative z-10">
+          <button onClick={() => navigateTo(DASHBOARD.path)} className="inline-flex items-center px-6 py-3 text-base font-medium text-black bg-white rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors relative z-10">
             Get Started Quickly
             <ArrowRight className="ml-2 h-5 w-5" />
           </button>
@@ -69,7 +71,7 @@ export default function HomePage() {
               <p className="text-gray-400 text-center">
                 Drag and drop your dist folder or click to browse
               </p>
-              <button onClick={navigateTo} className="px-6 py-3 text-sm font-medium border border-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+              <button onClick={() => navigateTo()} className="px-6 py-3 text-sm font-medium border border-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                 Select Folder
               </button>
             </div>
@@ -90,7 +92,7 @@ export default function HomePage() {
             />
             <Zap className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           </div>
-          <button onClick={navigateTo} className="px-6 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center">
+          <button onClick={() => navigateTo()} className="px-6 py-2 text-sm font-medium text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center">
             <Rocket className="mr-2 h-4 w-4" />
             Deploy with AI
           </button>
