@@ -47,25 +47,27 @@ class CloudinaryService {
     filetypeMeta: FileType,
     project_id: string,
   ): Promise<any> {
-    console.log("uploading... ", filename, project_id);
-    const formData = new FormData();
-    formData.append("file", new Blob([file]));
-    !this.isImageFile(filetypeMeta) &&
-      formData.append("public_id", `${filename}.${filetypeMeta.ext}`);
-    formData.append("asset_folder", `${this.ROOT_ASSETS_PATH}/${project_id}`);
-    formData.append("upload_preset", "nimbus_projectfiles");
+    try {
+      const formData = new FormData();
+      formData.append("file", new Blob([file]));
+      !this.isImageFile(filetypeMeta) &&
+        formData.append("public_id", `${filename}.${filetypeMeta.ext}`);
+      formData.append("asset_folder", `${this.ROOT_ASSETS_PATH}/${project_id}`);
+      formData.append("upload_preset", "nimbus_projectfiles");
 
-    const uploadResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${this.CLOUD_NAME}/auto/upload`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
-    const data = await uploadResponse.json();
-    console.log(data);
-
-    return data;
+      const uploadResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${this.CLOUD_NAME}/auto/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+      const data = await uploadResponse.json();
+      return data;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 
   isImageFile(fileTypeMeta: FileType) {
