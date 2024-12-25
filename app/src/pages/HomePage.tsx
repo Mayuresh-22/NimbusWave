@@ -26,7 +26,7 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto relative z-10">
-            Zero-onfig AI-powered edge deployment platform that takes your JS/TS apps from local to global in seconds
+            Zero-config AI-powered edge deployment platform that takes your JS/TS apps from local to global in seconds
           </p>
           <button onClick={() => navigateTo(DASHBOARD.path)} className="inline-flex items-center px-6 py-3 text-base font-medium text-black bg-white rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors relative z-10">
             Get Started Quickly

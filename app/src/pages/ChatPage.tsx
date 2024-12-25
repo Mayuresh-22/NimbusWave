@@ -47,9 +47,9 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
+  const handleSend = async (triggeredByUser: boolean = true) => {
     if (!input.trim()) return;
-    setMessages((prevMessages) => [...prevMessages, { role: "user", content: input }]);
+    if (triggeredByUser) setMessages((prevMessages) => [...prevMessages, { role: "user", content: input }]);
     setInput("");
 
     const response = await deploy.sendMessage(
@@ -79,7 +79,7 @@ export default function ChatPage() {
     */
     if (response.tool) {
       // execute the tool command
-      tools[response.tool](response.value);
+      const toolResponse = tools[response.tool](response.value);
     }
   };
 
@@ -279,7 +279,7 @@ export default function ChatPage() {
                 className="flex-1 px-4 py-3 text-sm bg-gray-900 rounded-full border border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent"
               />
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim()}
                 className="px-4 py-3 text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
