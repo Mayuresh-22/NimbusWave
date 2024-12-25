@@ -1,4 +1,4 @@
-# NimbusWave 🚀
+# NimbusWave
 ![image](https://github.com/user-attachments/assets/d5e4edf1-9f1a-4ec3-b519-6129ccf5bc29)
 [![License](https://img.shields.io/badge/license-GPL3.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
