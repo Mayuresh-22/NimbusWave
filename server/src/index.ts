@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import APIEndpoint from "./api";
-import AuthMiddleware from "./middlewares/auth";
 import { cors } from "hono/cors";
+import APIEndpoint from "./api";
 import AppEndpoint from "./api/serve_app";
+import AuthMiddleware from "./middlewares/auth";
 
 /*
   This is the custom binding interface to include the .dev.vars

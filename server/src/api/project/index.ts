@@ -1,13 +1,13 @@
 // this is the entry point for the AI module
-import { Hono } from "hono";
-import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
-import { Bindings } from "../..";
+import { Hono } from "hono";
 import { v4 } from "uuid";
-import { AuthContext } from "../../middlewares/auth";
-import FRAMEWORK_PROCESSORS from "../../services/frameworks";
-import DeploymentService from "../../services/deployment";
+import { z } from "zod";
+import type { Bindings } from "../..";
+import type { AuthContext } from "../../middlewares/auth";
 import { UserCreditsMiddleware } from "../../middlewares/userCredits";
+import DeploymentService from "../../services/deployment";
+import FRAMEWORK_PROCESSORS from "../../services/frameworks";
 
 const CreateProjectReqSchema = z.object({
   default: z.boolean(),
@@ -24,7 +24,7 @@ const DeployProjectReqSchema = z
     project_framework: z.string().nonempty().max(10),
   })
   .refine((project) => project.project_framework in FRAMEWORK_PROCESSORS, {
-    message: `Project framework is invalid or not supported`,
+    message: "Project framework is invalid or not supported",
   });
 
 const ProjectEndpoint = new Hono<{
@@ -53,7 +53,7 @@ ProjectEndpoint.post(
   */
 
     const userResult = await c.env.DB.prepare(
-      "SELECT project_credits FROM users WHERE id = ?"
+      "SELECT project_credits FROM users WHERE id = ?",
     )
       .bind(c.var.user.id)
       .first();
@@ -64,7 +64,7 @@ ProjectEndpoint.post(
           status: "error",
           message: "User not found, complete onboarding process first.",
         },
-        401
+        401,
       );
     } else if ((userResult.project_credits as number) < 1) {
       return c.json(
@@ -72,7 +72,7 @@ ProjectEndpoint.post(
           status: "error",
           message: "Insufficient project credits, purchase more credits.",
         },
-        200
+        200,
       );
     }
 
@@ -82,13 +82,13 @@ ProjectEndpoint.post(
     if (body.default) {
       const projectResult = await c.env.DB.batch([
         c.env.DB.prepare(
-          "INSERT INTO projects (project_id, chat_id, user_id) VALUES (?, ?, ?)"
+          "INSERT INTO projects (project_id, chat_id, user_id) VALUES (?, ?, ?)",
         ).bind(projectId, chatId, c.var.user.id),
         c.env.DB.prepare(
-          "INSERT INTO chats (chat_id, project_id, user_id) VALUES (?, ?, ?)"
+          "INSERT INTO chats (chat_id, project_id, user_id) VALUES (?, ?, ?)",
         ).bind(chatId, projectId, c.var.user.id),
         c.env.DB.prepare(
-          "UPDATE users SET project_credits = ? WHERE id = ?"
+          "UPDATE users SET project_credits = ? WHERE id = ?",
         ).bind((userResult.project_credits as number) - 1, c.var.user.id),
       ]);
 
@@ -96,7 +96,7 @@ ProjectEndpoint.post(
         if (queryResult.success !== true && queryResult.meta.changes !== 1) {
           return c.json(
             { status: "error", message: "Project creation failed" },
-            500
+            500,
           );
         }
       });
@@ -111,10 +111,10 @@ ProjectEndpoint.post(
             project_type: "private",
           },
         },
-        200
+        200,
       );
     }
-  }
+  },
 );
 
 ProjectEndpoint.get("/project", async (c) => {
@@ -126,13 +126,13 @@ ProjectEndpoint.get("/project", async (c) => {
         status: "error",
         message: "Project ID is required",
       },
-      400
+      400,
     );
   }
 
   const projectResult = await c.env.DB.prepare(
     `SELECT  projects.project_id, chats.chat_id, project_name, project_framework, project_description, project_status, chats.chat_context 
-    FROM projects JOIN chats ON projects.chat_id = chats.chat_id WHERE projects.project_id = ? AND projects.user_id = ? AND chats.user_id = ?`
+    FROM projects JOIN chats ON projects.chat_id = chats.chat_id WHERE projects.project_id = ? AND projects.user_id = ? AND chats.user_id = ?`,
   )
     .bind(id, c.var.user.id, c.var.user.id)
     .first();
@@ -145,7 +145,7 @@ ProjectEndpoint.get("/project", async (c) => {
         status: "error",
         message: "Project not found",
       },
-      404
+      404,
     );
   }
 
@@ -154,7 +154,7 @@ ProjectEndpoint.get("/project", async (c) => {
       status: "success",
       data: projectResult,
     },
-    200
+    200,
   );
 });
 
@@ -179,12 +179,12 @@ ProjectEndpoint.post(
           status: "error",
           message: "Invalid file type, only zip files are allowed",
         },
-        400
+        400,
       );
     }
     // check if project exists
     const existingProject = await c.env.DB.prepare(
-      "SELECT * FROM projects WHERE project_id = ? AND user_id = ?"
+      "SELECT * FROM projects WHERE project_id = ? AND user_id = ?",
     )
       .bind(projectId, c.var.user.id)
       .first();
@@ -195,7 +195,7 @@ ProjectEndpoint.post(
           status: "error",
           message: "Project not found",
         },
-        404
+        404,
       );
     }
     /*
@@ -231,18 +231,18 @@ ProjectEndpoint.post(
       c.env.DB.prepare(
         `INSERT INTO deployments (deployment_id, project_id, 
         deployment_status, deployment_logs, deployment_size, time_taken) 
-        VALUES (?, ?, 1, ?, ?, ?)`
+        VALUES (?, ?, 1, ?, ?, ?)`,
       ).bind(
         deployServiceResult.deploymentId,
         projectId,
         deployServiceResult.log,
         deployServiceResult.projectSize,
-        deployServiceResult.timeTaken
+        deployServiceResult.timeTaken,
       ),
       c.env.DB.prepare(
         `UPDATE projects SET project_name = ?, project_app_name = ?, project_framework = ?, 
         project_description = ?, project_status = 1, project_size = ?, entry_file_path = ?, 
-        is_temp = 0 WHERE project_id = ? AND user_id = ?`
+        is_temp = 0 WHERE project_id = ? AND user_id = ?`,
       ).bind(
         projectName,
         deployServiceResult.appName,
@@ -251,7 +251,7 @@ ProjectEndpoint.post(
         deployServiceResult.projectSize,
         deployServiceResult.deploymentResult.secure_url,
         projectId,
-        c.var.user.id
+        c.var.user.id,
       ),
     ]);
     /*
@@ -265,7 +265,7 @@ ProjectEndpoint.post(
             message: "Project deployment failed",
             logs: deployServiceResult.log,
           },
-          500
+          500,
         );
       }
     });
@@ -283,9 +283,9 @@ ProjectEndpoint.post(
           deployment_logs: deployServiceResult.log,
         },
       },
-      200
+      200,
     );
-  }
+  },
 );
 
 export default ProjectEndpoint;

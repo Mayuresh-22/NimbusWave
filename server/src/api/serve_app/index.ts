@@ -1,8 +1,8 @@
 // this is the entry point for the AI module
+import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
-import { Bindings } from "../..";
+import type { Bindings } from "../..";
 import { DEPLOYMENT_NOT_FOUND_HTML } from "../../html/deployment_not_found";
 
 const AppEndpointReqSchema = z.object({
@@ -15,23 +15,22 @@ const AppEndpointReqSchema = z.object({
 
 const AppEndpoint = new Hono<{ Bindings: Bindings }>();
 
-AppEndpoint.get(
-  "/app/:app_name/*",
-  async (c) => {
-    const appName = c.req.param("app_name");
+AppEndpoint.get("/app/:app_name/*", async (c) => {
+  const appName = c.req.param("app_name");
 
-    const projectResult = await c.env.DB.prepare(
-      "SELECT entry_file_path FROM projects WHERE project_app_name = ?"
-    )
-      .bind(appName)
-      .first();
+  const projectResult = await c.env.DB.prepare(
+    "SELECT entry_file_path FROM projects WHERE project_app_name = ?",
+  )
+    .bind(appName)
+    .first();
 
-    if (!projectResult) {
-      return c.html(DEPLOYMENT_NOT_FOUND_HTML);
-    }
-    const appHTML =  await fetch(projectResult.entry_file_path as string).then((res) => res.text());
-    return c.html(appHTML);
-  },
-);
+  if (!projectResult) {
+    return c.html(DEPLOYMENT_NOT_FOUND_HTML);
+  }
+  const appHTML = await fetch(projectResult.entry_file_path as string).then(
+    (res) => res.text(),
+  );
+  return c.html(appHTML);
+});
 
 export default AppEndpoint;

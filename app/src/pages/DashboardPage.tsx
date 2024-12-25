@@ -1,30 +1,75 @@
-import { useState } from 'react'
-import { Menu, X, Rocket, Server, Globe, Settings, Activity, Users, BarChart, ChevronRight } from 'lucide-react'
-import { Link } from 'react-router'
+import {
+  Menu,
+  X,
+  Rocket,
+  Server,
+  Globe,
+  Settings,
+  Activity,
+  Users,
+  BarChart,
+  ChevronRight,
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router";
 
 export default function DashboardPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const stats = [
-    { label: 'Total Deployments', value: '234', icon: Rocket },
-    { label: 'Active Projects', value: '12', icon: Server },
-    { label: 'Edge Regions', value: '45', icon: Globe },
-    { label: 'Uptime', value: '99.9%', icon: Activity }
-  ]
+    { label: "Total Deployments", value: "234", icon: Rocket },
+    { label: "Active Projects", value: "12", icon: Server },
+    { label: "Edge Regions", value: "45", icon: Globe },
+    { label: "Uptime", value: "99.9%", icon: Activity },
+  ];
 
   const recentDeployments = [
-    { id: 1, name: 'E-commerce Frontend', status: 'success', time: '2 minutes ago' },
-    { id: 2, name: 'API Gateway', status: 'building', time: '5 minutes ago' },
-    { id: 3, name: 'Auth Service', status: 'success', time: '1 hour ago' },
-    { id: 4, name: 'Analytics Dashboard', status: 'failed', time: '2 hours ago' }
-  ]
+    {
+      id: 1,
+      name: "E-commerce Frontend",
+      status: "success",
+      time: "2 minutes ago",
+    },
+    { id: 2, name: "API Gateway", status: "building", time: "5 minutes ago" },
+    { id: 3, name: "Auth Service", status: "success", time: "1 hour ago" },
+    {
+      id: 4,
+      name: "Analytics Dashboard",
+      status: "failed",
+      time: "2 hours ago",
+    },
+  ];
 
   const projects = [
-    { id: 1, name: 'E-commerce Frontend', status: 'active', users: 12, requests: '2.3M' },
-    { id: 2, name: 'API Gateway', status: 'active', users: 45, requests: '5.1M' },
-    { id: 3, name: 'Auth Service', status: 'maintenance', users: 8, requests: '1.8M' },
-    { id: 4, name: 'Analytics Dashboard', status: 'active', users: 23, requests: '3.2M' }
-  ]
+    {
+      id: 1,
+      name: "E-commerce Frontend",
+      status: "active",
+      users: 12,
+      requests: "2.3M",
+    },
+    {
+      id: 2,
+      name: "API Gateway",
+      status: "active",
+      users: 45,
+      requests: "5.1M",
+    },
+    {
+      id: 3,
+      name: "Auth Service",
+      status: "maintenance",
+      users: 8,
+      requests: "1.8M",
+    },
+    {
+      id: 4,
+      name: "Analytics Dashboard",
+      status: "active",
+      users: 23,
+      requests: "3.2M",
+    },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
@@ -51,23 +96,32 @@ export default function DashboardPage() {
           <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
             {/* Recent Deployments */}
             <div>
-              <h2 className="text-2xl font-semibold mb-4">Recent Deployments</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                Recent Deployments
+              </h2>
               <div className="bg-gray-900 rounded-lg border border-gray-800">
                 <div className="p-6">
                   <div className="space-y-4">
                     {recentDeployments.map((deployment) => (
-                      <div key={deployment.id} className="flex items-center justify-between">
+                      <div
+                        key={deployment.id}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex items-center space-x-3">
-                          <div 
+                          <div
                             className={`w-2 h-2 rounded-full ${
-                              deployment.status === 'success' ? 'bg-green-400' :
-                              deployment.status === 'building' ? 'bg-yellow-400' :
-                              'bg-red-400'
+                              deployment.status === "success"
+                                ? "bg-green-400"
+                                : deployment.status === "building"
+                                  ? "bg-yellow-400"
+                                  : "bg-red-400"
                             }`}
                           />
                           <div>
                             <p className="font-medium">{deployment.name}</p>
-                            <p className="text-sm text-gray-400">{deployment.time}</p>
+                            <p className="text-sm text-gray-400">
+                              {deployment.time}
+                            </p>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-gray-400" />
@@ -83,12 +137,17 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-semibold mb-4">Active Projects</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {projects.map((project) => (
-                  <div key={project.id} className="bg-gray-900 rounded-lg p-6 border border-gray-800 hover:border-gray-700 transition-colors">
+                  <div
+                    key={project.id}
+                    className="bg-gray-900 rounded-lg p-6 border border-gray-800 hover:border-gray-700 transition-colors"
+                  >
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-medium text-lg">{project.name}</h3>
-                      <div 
+                      <div
                         className={`w-3 h-3 rounded-full ${
-                          project.status === 'active' ? 'bg-green-400' : 'bg-yellow-400'
+                          project.status === "active"
+                            ? "bg-green-400"
+                            : "bg-yellow-400"
                         }`}
                       />
                     </div>
@@ -110,6 +169,5 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
-

@@ -1,8 +1,8 @@
 // this is the entry point for the AI module
+import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
-import { Bindings } from "../..";
+import type { Bindings } from "../..";
 import llmService from "../../services/llmService";
 
 const ChatEndpointRequest = z.object({

@@ -1,11 +1,17 @@
-import { AuthError, createClient, Session, SupabaseClient, User, WeakPassword } from '@supabase/supabase-js'
-import store from '../store/store';
-import { setIsAuthenticated, setUser } from '../store/userSlice';
+import type {
+  AuthError,
+  Session,
+  SupabaseClient,
+  User,
+  WeakPassword,
+} from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+import store from "../store/store";
+import { setIsAuthenticated, setUser } from "../store/userSlice";
 
 interface MetaData {
   [key: string]: string;
 }
-
 
 class Supabase {
   private supabase: SupabaseClient | null = null;
@@ -14,7 +20,7 @@ class Supabase {
   constructor() {
     this.supabase = createClient(
       import.meta.env.VITE_SUPABASE_URL as string,
-      import.meta.env.VITE_SUPABASE_ANON_KEY as string
+      import.meta.env.VITE_SUPABASE_ANON_KEY as string,
     );
   }
 
@@ -23,25 +29,34 @@ class Supabase {
       if (!this.supabase) {
         throw new Error("Supabase client not initialized");
       }
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser();
       return user;
     } catch (error) {
       return null;
     }
   }
 
-  async signIn(email: string, password: string): Promise<{
-    user: User;
-    session: Session;
-    weakPassword?: WeakPassword;
-  } | AuthError | null> {
+  async signIn(
+    email: string,
+    password: string,
+  ): Promise<
+    | {
+        user: User;
+        session: Session;
+        weakPassword?: WeakPassword;
+      }
+    | AuthError
+    | null
+  > {
     try {
       if (!this.supabase) {
         throw new Error("Supabase client not initialized");
       }
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
       if (error) {
         return error;
@@ -54,10 +69,18 @@ class Supabase {
     }
   }
 
-  async signUp(email: string, password: string, metaData: MetaData): Promise<{
-    user: User | null;
-    session: Session | null;
-  } | AuthError | null> {
+  async signUp(
+    email: string,
+    password: string,
+    metaData: MetaData,
+  ): Promise<
+    | {
+        user: User | null;
+        session: Session | null;
+      }
+    | AuthError
+    | null
+  > {
     try {
       if (!this.supabase) {
         throw new Error("Supabase client not initialized");
@@ -66,8 +89,8 @@ class Supabase {
         email,
         password,
         options: {
-          data: metaData
-        }
+          data: metaData,
+        },
       });
       if (error) {
         return error;

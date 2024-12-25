@@ -1,0 +1,62 @@
+{
+  "name": "nimbuswave",
+  "version": "1.0.0",
+  "description": "AI-powered edge deployment platform, deploy and scale your JavaScript & TypeScript web apps.",
+  "workspaces": [
+    "app",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npm --parallel run dev",
+    "build": "npm --recursive run build",
+    "dev:app": "cd app && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build:app": "cd app && npm run build",
+    "build:server": "cd server && npm run build",
+    "lint": "eslint ./app ./server",
+    "lint:fix": "eslint --fix ./app ./server",
+    "prettier": "prettier --write ./app ./server"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.37.3",
+    "globals": "^15.14.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.18.2"
+  },
+  "packageManager": "npm@10.8.0",
+  "engines": {
+    "node": ">=20.0.0"
+},
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "keywords": [],
+  "author": "Mayuresh Choudhary",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mayuresh-22/NimbusWave.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mayuresh-22/NimbusWave/issues"
+  },
+  "homepage": "https://github.com/Mayuresh-22/NimbusWave#readme",
+  "dependencies": {
+    "@hono/eslint-config": "^1.0.2"
+  }
+}

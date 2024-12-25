@@ -1,10 +1,10 @@
 import AdmZip from "adm-zip";
+import type { Context } from "hono";
+import { v4 } from "uuid";
+import type { Bindings } from "..";
+import type { AuthContext } from "../middlewares/auth";
 import CloudinaryService, { allowedFileTypes } from "./cloudinary";
 import FRAMEWORK_PROCESSORS from "./frameworks";
-import { Context } from "hono";
-import { AuthContext } from "../middlewares/auth";
-import { Bindings } from "..";
-import { v4 } from "uuid";
 import { normalizeProjectName } from "./helper";
 
 interface ProjectMeta {
@@ -55,7 +55,7 @@ class DeploymentService {
     flags: DeploymentFlags = {
       UPDATE_PROJECT_APP_NAME: meta.project_app_name ? false : true, // update project app name if null
       UPDATE_BASE_NAME: false,
-    }
+    },
   ) {
     this.c = c;
     this.projectId = projectId;
@@ -75,7 +75,7 @@ class DeploymentService {
    * Unzips the uploaded project files
    * @returns {Promise<DeploymentService>} Deployment service instance
    * @throws {Error} Error if unzipping fails
-    */
+   */
   async unzip() {
     try {
       // unzip the project files
@@ -90,7 +90,7 @@ class DeploymentService {
       this.zipArchive = new AdmZip(Buffer.from(this.zipBuffer));
       this.zipContents = this.zipArchive.getEntries();
       this.indexHTMLEntry = this.zipContents.find((entry) =>
-        entry.entryName.includes(this.INDEX_DOT_HTML)
+        entry.entryName.includes(this.INDEX_DOT_HTML),
       );
       this.indexHTMLFileBuffer = this.indexHTMLEntry?.getData().toString();
       this.log("Unzipping successful");
@@ -134,23 +134,23 @@ class DeploymentService {
           `${fileBaseName}.${fileExtension}`,
           {
             type: fileTypeConfig.type,
-          }
+          },
         );
 
         // upload the file to cloudinary
         const cloudinaryResponse = await new CloudinaryService(
-          this.c
+          this.c,
         ).uploadFile(
           await file.arrayBuffer(),
           fileBaseName,
           fileTypeConfig,
-          this.projectId
+          this.projectId,
         );
 
         if (!cloudinaryResponse) {
           throw new Error(`Upload failed for '${filePath}'`);
         }
-        
+
         // process index.html via the framework processor
         this.indexHTMLFileBuffer = FRAMEWORK_PROCESSORS[
           this.meta.project_framework
@@ -159,7 +159,7 @@ class DeploymentService {
           {
             [filePath]: cloudinaryResponse.secure_url,
           },
-          true
+          true,
         );
         this.log(`Processed file ${filePath} successfully.`);
       }
@@ -183,14 +183,14 @@ class DeploymentService {
       const indexHTMLFile = new File(
         [this.indexHTMLFileBuffer as string],
         this.INDEX_DOT_HTML,
-        { type: "text/html" }
+        { type: "text/html" },
       );
 
       const cloudinaryResponse = await new CloudinaryService(this.c).uploadFile(
         await indexHTMLFile.arrayBuffer(),
         "index",
         allowedFileTypes.html,
-        this.projectId
+        this.projectId,
       );
 
       if (!cloudinaryResponse) {
@@ -219,7 +219,7 @@ class DeploymentService {
       deploymentId: v4(),
       deploymentName: normalizeProjectName(
         this.meta.project_name,
-        "deployment"
+        "deployment",
       ),
       appName: this.PROJECT_APP_NAME,
       projectSize: this.PROJECT_SIZE,

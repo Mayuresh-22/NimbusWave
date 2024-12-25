@@ -1,15 +1,14 @@
 import BaseService from "./base";
 
 class DeploymentService extends BaseService {
-
   constructor() {
     super();
   }
 
   async createNewProject() {
     try {
-      const response = await this.server.post('/api/project', {
-        default: true
+      const response = await this.server.post("/api/project", {
+        default: true,
       });
       return response.data;
     } catch (error) {
@@ -20,10 +19,12 @@ class DeploymentService extends BaseService {
 
   async getProjecrt(projectId: string, withChats: boolean = false) {
     try {
-      const response = await this.server.get(`/api/project?id=${projectId}&withChats=${withChats}`);
+      const response = await this.server.get(
+        `/api/project?id=${projectId}&withChats=${withChats}`,
+      );
       return response.data;
     } catch (error) {
-      return null
+      return null;
     }
   }
 
@@ -32,17 +33,21 @@ class DeploymentService extends BaseService {
       const response = await this.server.post("/api/ai/chat", {
         message,
         project_id: projectId,
-        chat_id: chatId
+        chat_id: chatId,
       });
       return response.data;
     } catch (error) {
-      return null
+      return null;
     }
   }
 
   async deployProject(
-    projectId: string, projectName: string,
-    projectFramework: string, projectDescription: string, zipProjectFiles: File) {
+    projectId: string,
+    projectName: string,
+    projectFramework: string,
+    projectDescription: string,
+    zipProjectFiles: File,
+  ) {
     try {
       const formData = new FormData();
       formData.append("project_id", projectId);
@@ -52,8 +57,8 @@ class DeploymentService extends BaseService {
       formData.append("file", zipProjectFiles);
       const response = await this.server.post("/api/project/deploy", formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
       return response.data;
     } catch (error) {

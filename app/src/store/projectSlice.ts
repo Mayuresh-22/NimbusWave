@@ -12,18 +12,18 @@ export interface ProjectState {
 
 const initialState: ProjectState = {
   project: null,
-  projects: []
+  projects: [],
 };
 
 const projectSlice = createSlice({
   name: "project",
   initialState,
   reducers: {
-    setProject(state, action: {payload: Project, type: string}) {
+    setProject(state, action: { payload: Project; type: string }) {
       state.project = action.payload;
     },
-    addProject(state, action: {payload: Project, type: string}) {
-      state.projects = [...state.projects, action.payload]
+    addProject(state, action: { payload: Project; type: string }) {
+      state.projects = [...state.projects, action.payload];
     },
   },
 });

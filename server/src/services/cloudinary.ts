@@ -1,6 +1,6 @@
-import { Bindings } from "..";
-import { AuthContext } from "../middlewares/auth";
-import { Context } from "hono";
+import type { Context } from "hono";
+import type { Bindings } from "..";
+import type { AuthContext } from "../middlewares/auth";
 
 /**
  * File type interface
@@ -36,7 +36,7 @@ interface FileType {
  * @property {FileType} ogg - OGG file type
  * @property {FileType} mp3 - MP3 file type
  * @property {FileType} wav - WAV file type
-  */
+ */
 export const allowedFileTypes: { [key: string]: FileType } = {
   html: { type: "text/html", file: "text", ext: "html" },
   css: { type: "text/css", file: "text", ext: "css" },
@@ -66,7 +66,7 @@ export const allowedFileTypes: { [key: string]: FileType } = {
  * const cloudinaryService = new CloudinaryService(c);
  * const uploadResponse = await cloudinaryService.uploadFile(file, filename, filetypeMeta, project_id);
  * console.log(uploadResponse);
-*/
+ */
 class CloudinaryService {
   private CLOUD_NAME: string;
   private api_key: string;

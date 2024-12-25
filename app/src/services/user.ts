@@ -8,7 +8,11 @@ class UserService extends BaseService {
     super();
   }
 
-  async createUser(uid: string, email: string, metaData: {}): Promise<{} | null> {
+  async createUser(
+    uid: string,
+    email: string,
+    metaData: {},
+  ): Promise<{} | null> {
     try {
       const response = await this.server.post("/api/user", {
         uid,

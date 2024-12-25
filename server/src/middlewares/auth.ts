@@ -1,7 +1,7 @@
+import type { User } from "@supabase/supabase-js";
 import { createMiddleware } from "hono/factory";
-import { Bindings } from "..";
+import type { Bindings } from "..";
 import Supabase from "../services/supabase";
-import { User } from "@supabase/supabase-js";
 
 export type AuthContext = {
   user: User;
@@ -22,7 +22,10 @@ const AuthMiddleware = createMiddleware<{
     await next();
   } catch (error) {
     console.log(error);
-    return c.json({ error: "Internal Server Error, Error Code: AM_01", message: error }, 500);
+    return c.json(
+      { error: "Internal Server Error, Error Code: AM_01", message: error },
+      500,
+    );
   }
 });
 

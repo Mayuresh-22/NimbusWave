@@ -1,6 +1,7 @@
 // this class is the base class of all the server related services
 
-import axios, { AxiosInstance } from "axios";
+import type { AxiosInstance } from "axios";
+import axios from "axios";
 import supabase from "./supabase";
 
 class BaseService {
@@ -11,7 +12,7 @@ class BaseService {
       baseURL: import.meta.env.VITE_SERVER_URL as string,
       headers: {
         "Content-Type": "application/json",
-      }
+      },
     });
 
     // request interceptor
@@ -22,10 +23,9 @@ class BaseService {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
   }
-  
 }
 
 export default BaseService;

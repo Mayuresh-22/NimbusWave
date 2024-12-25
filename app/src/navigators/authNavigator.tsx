@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import App from "../App";
-import OnboardPage from "../pages/OnboardPage";
 import HomePage from "../pages/HomePage";
-
+import OnboardPage from "../pages/OnboardPage";
 
 export default function AuthNavigator() {
   return (
@@ -14,5 +13,5 @@ export default function AuthNavigator() {
         </Route>
       </Routes>
     </BrowserRouter>
-  )
+  );
 }

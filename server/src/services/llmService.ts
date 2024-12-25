@@ -1,6 +1,6 @@
 // Purpose: Service to send/receive LLM messages
 import Groq from "groq-sdk";
-import { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions.mjs";
+import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions.mjs";
 
 interface LLMResponse {
   message: string;
@@ -12,7 +12,7 @@ interface LLMResponse {
  * Service to send/receive LLM messages
  * @constructor
  * @param {string} apiKey - API key for the Groq API
-  */
+ */
 class LLMService {
   llmProvider = "groq";
   llm = "llama-3.1-70b-versatile";
@@ -59,8 +59,8 @@ Ask next question after one is answered. (Otherwise you will be penalised)
    * @param {ChatCompletionMessageParam[]} context - Context of the conversation
    * @returns {Promise<LLMResponse>} Response
    * @throws {Error} Error
-   * @async 
-  */
+   * @async
+   */
   async getLLMResponse(
     message: string,
     context: ChatCompletionMessageParam[],
@@ -87,8 +87,8 @@ Ask next question after one is answered. (Otherwise you will be penalised)
       stream: false,
       stop: null,
       response_format: {
-        "type": "json_object"
-      }
+        type: "json_object",
+      },
     });
 
     console.log(chatCompletion.choices[0].message.content);

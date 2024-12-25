@@ -1,6 +1,7 @@
-import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
-import { Context } from "hono";
-import { Bindings } from "..";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+import type { Context } from "hono";
+import type { Bindings } from "..";
 
 /**
  * Supabase service

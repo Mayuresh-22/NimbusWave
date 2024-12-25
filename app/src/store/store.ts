@@ -1,7 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer, { UserState } from "./userSlice";
+import type { ProjectState } from "./projectSlice";
 import projectReducer from "./projectSlice";
-import { ProjectState } from "./projectSlice";
+import type { UserState } from "./userSlice";
+import userReducer from "./userSlice";
 
 export interface RootState {
   user: UserState;

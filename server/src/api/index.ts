@@ -1,8 +1,8 @@
 import { Hono } from "hono";
+import type { Bindings } from "..";
 import AIEndpoint from "./ai";
-import { Bindings } from "..";
-import UserEndpoint from "./user";
 import ProjectEndpoint from "./project";
+import UserEndpoint from "./user";
 
 const APIEndpoint = new Hono<{ Bindings: Bindings }>();
 

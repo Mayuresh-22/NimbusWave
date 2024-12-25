@@ -1,10 +1,9 @@
-import { BrowserRouter, Route, Routes } from "react-router"
-import HomePage from "../pages/HomePage"
-import App from "../App"
-import ChatPage from "../pages/ChatPage"
-import OnboardPage from "../pages/OnboardPage"
-import DashboardPage from "../pages/DashboardPage"
-
+import { BrowserRouter, Route, Routes } from "react-router";
+import App from "../App";
+import ChatPage from "../pages/ChatPage";
+import DashboardPage from "../pages/DashboardPage";
+import HomePage from "../pages/HomePage";
+import OnboardPage from "../pages/OnboardPage";
 
 export default function AppNavigator() {
   return (
@@ -13,7 +12,8 @@ export default function AppNavigator() {
         <Route path="" element={<App />}>
           <Route path="" element={<HomePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/onboard" element={<OnboardPage />} />  {/* TODO: Remove this line */}
+          <Route path="/onboard" element={<OnboardPage />} />{" "}
+          {/* TODO: Remove this line */}
           <Route path="/deploy/:projectId?" element={<ChatPage />} />
           <Route path="/about" element={<h1>About</h1>} />
           <Route path="/pricing" element={<h1>Pricing</h1>} />
@@ -21,5 +21,5 @@ export default function AppNavigator() {
         </Route>
       </Routes>
     </BrowserRouter>
-  )
+  );
 }

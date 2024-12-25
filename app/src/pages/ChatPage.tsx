@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from "react";
 import { Send, Upload, Stars, UserRound } from "lucide-react";
-import deploy from "../services/deploy";
-import Alert from "../components/common/Alert";
-import { useNavigate, useParams } from "react-router";
+import { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router";
+import Alert from "../components/common/Alert";
+import deploy from "../services/deploy";
 import { setProject } from "../store/projectSlice";
-import { RootState } from "../store/store";
+import type { RootState } from "../store/store";
 
 interface Message {
   role: "user" | "assistant";
@@ -48,17 +48,24 @@ export default function ChatPage() {
   }, [messages]);
 
   const handleSend = async (triggeredByUser: boolean = true) => {
-    if (!input.trim()) return;
-    if (triggeredByUser) setMessages((prevMessages) => [...prevMessages, { role: "user", content: input }]);
+    if (!input.trim()) {
+      return;
+    }
+    if (triggeredByUser) {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: "user", content: input },
+      ]);
+    }
     setInput("");
 
     const response = await deploy.sendMessage(
       project?.projectID as string,
       project?.chatId as string,
-      input
+      input,
     );
     console.log(response);
-    
+
     if (!response) {
       setAlert({
         type: "error",
@@ -86,12 +93,13 @@ export default function ChatPage() {
   const initDeployment = async () => {
     // make request to server to start deployment
     const deployResponse = await deploy.deployProject(
-      project?.projectID as string, 
+      project?.projectID as string,
       projectName,
       projectFramework,
       projectDescription,
-      zipProjectFiles as File);
-    
+      zipProjectFiles as File,
+    );
+
     if (!deployResponse) {
       setAlert({
         type: "error",
@@ -101,7 +109,7 @@ export default function ChatPage() {
     }
     setProjectStatus(1);
     setAlert({ type: "success", message: "Project deployed successfully!" });
-  }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -124,7 +132,9 @@ export default function ChatPage() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const zipProjectFiles = e.target.files?.[0];
     console.log(zipProjectFiles);
-    if (!zipProjectFiles) return;
+    if (!zipProjectFiles) {
+      return;
+    }
     setZipProjectFiles(zipProjectFiles);
   };
 
@@ -132,14 +142,13 @@ export default function ChatPage() {
     fileInputRef.current?.click();
   };
 
-  
-  const tools: {[key: string]: ((value: any) => void) | (() => void)} = {
-    "saveProjectName": setProjectName,
-    "saveProjectFramework": setProjectFramework,
-    "saveProjectDescription": setProjectDescription,
-    "saveProjectStatus": setProjectStatus,
-    "initDeployment": initDeployment,
-  }
+  const tools: { [key: string]: ((value: any) => void) | (() => void) } = {
+    saveProjectName: setProjectName,
+    saveProjectFramework: setProjectFramework,
+    saveProjectDescription: setProjectDescription,
+    saveProjectStatus: setProjectStatus,
+    initDeployment: initDeployment,
+  };
 
   useEffect(() => {
     // create a new project record on server
@@ -160,7 +169,7 @@ export default function ChatPage() {
           setProject({
             projectID: response.data.project_id,
             chatId: response.data.chat_id,
-          })
+          }),
         );
         navigate(`${response.data.project_id}`);
       } else if (projectId && project?.projectID !== projectId) {
@@ -179,12 +188,17 @@ export default function ChatPage() {
         setProjectFramework(response.data.project_framework);
         setProjectDescription(response.data.project_description);
         setProjectStatus(response.data.project_status);
-        setMessages((prevMessages) => [...prevMessages, ...(response.data.chat_context ? JSON.parse(response.data.chat_context) : [])]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          ...(response.data.chat_context
+            ? JSON.parse(response.data.chat_context)
+            : []),
+        ]);
         dispatch(
           setProject({
             projectID: response.data.project_id,
             chatId: response.data.chat_id,
-          })
+          }),
         );
       }
     })();
