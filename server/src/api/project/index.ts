@@ -7,30 +7,39 @@ import { v4 } from "uuid";
 import { AuthContext } from "../../middlewares/auth";
 import FRAMEWORK_PROCESSORS from "../../services/frameworks";
 import DeploymentService from "../../services/deployment";
+import { UserCreditsMiddleware } from "../../middlewares/userCredits";
 
 const CreateProjectReqSchema = z.object({
   default: z.boolean(),
-  project_name: z.string().nonempty().optional(),
-  project_description: z.string().nonempty().optional(),
-  project_framework: z.string().nonempty().optional(),
+  project_name: z.string().nonempty().max(20).optional(),
+  project_description: z.string().nonempty().max(100).optional(),
+  project_framework: z.string().nonempty().max(10).optional(),
 });
 
 const DeployProjectReqSchema = z
   .object({
     project_id: z.string().nonempty(),
-    project_name: z.string().nonempty(),
-    project_description: z.string().nonempty(),
-    project_framework: z.string().nonempty(),
+    project_name: z.string().nonempty().max(20),
+    project_description: z.string().nonempty().max(100),
+    project_framework: z.string().nonempty().max(10),
   })
   .refine((project) => project.project_framework in FRAMEWORK_PROCESSORS, {
     message: `Project framework is invalid or not supported`,
   });
 
-
 const ProjectEndpoint = new Hono<{
   Bindings: Bindings;
   Variables: AuthContext;
 }>();
+
+/*
+  Mount middlewares on certain routes
+*/
+ProjectEndpoint.use("/project/deploy", UserCreditsMiddleware);
+
+/*
+  -------------------------- /project/* --------------------------
+*/
 
 ProjectEndpoint.post(
   "/project",
@@ -55,7 +64,7 @@ ProjectEndpoint.post(
           status: "error",
           message: "User not found, complete onboarding process first.",
         },
-        404
+        401
       );
     } else if ((userResult.project_credits as number) < 1) {
       return c.json(
@@ -173,24 +182,106 @@ ProjectEndpoint.post(
         400
       );
     }
-    const deploymentResult = await new DeploymentService(
+    // check if project exists
+    const existingProject = await c.env.DB.prepare(
+      "SELECT * FROM projects WHERE project_id = ? AND user_id = ?"
+    )
+      .bind(projectId, c.var.user.id)
+      .first();
+
+    if (!existingProject) {
+      return c.json(
+        {
+          status: "error",
+          message: "Project not found",
+        },
+        404
+      );
+    }
+    /*
+      Deployment process starts here this process will be completed synchronously.
+      It make use of chainable methods to process the deployment files.
+
+      Flags used in the deployment process:
+      UPDATE_PROJECT_APP_NAME: update project app name if null (default: true)
+      UPDATE_BASE_NAME: update base name if null (default: false)
+    */
+    const deployServiceResult = await new DeploymentService(
+      c,
       projectId,
       zipProjectFiles,
       {
+        project_app_name: existingProject.project_app_name,
         project_name: projectName,
         project_description: projectDescription,
         project_framework: projectFramework,
       },
-      c
-    ).unzip()
-    .then((deploymentService) => deploymentService.processFiles())
-    .then((deploymentService) => deploymentService.processIndexHTML())
+    )
+      .unzip()
+      .then((deploymentInstance) => deploymentInstance.processFiles())
+      .then((deploymentInstance) => deploymentInstance.processIndexHTML())
+      .then((deploymentInstance) => deploymentInstance.finalize());
+
+    /*
+      Insert deployment details into the database & update project details
+      TODO: add value for deployment_url column, construct url in following format:
+      ${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}
+    */
+    const deployQueryResults = await c.env.DB.batch([
+      c.env.DB.prepare(
+        `INSERT INTO deployments (deployment_id, project_id, 
+        deployment_status, deployment_logs, deployment_size, time_taken) 
+        VALUES (?, ?, 1, ?, ?, ?)`
+      ).bind(
+        deployServiceResult.deploymentId,
+        projectId,
+        deployServiceResult.log,
+        deployServiceResult.projectSize,
+        deployServiceResult.timeTaken
+      ),
+      c.env.DB.prepare(
+        `UPDATE projects SET project_name = ?, project_app_name = ?, project_framework = ?, 
+        project_description = ?, project_status = 1, project_size = ?, entry_file_path = ?, 
+        is_temp = 0 WHERE project_id = ? AND user_id = ?`
+      ).bind(
+        projectName,
+        deployServiceResult.appName,
+        projectFramework,
+        projectDescription,
+        deployServiceResult.projectSize,
+        deployServiceResult.deploymentResult.secure_url,
+        projectId,
+        c.var.user.id
+      ),
+    ]);
+    /*
+      Check if the deployment was successful and the changes were made in the database
+    */
+    deployQueryResults.map((queryResult) => {
+      if (queryResult.success !== true && queryResult.meta.changes !== 1) {
+        return c.json(
+          {
+            status: "error",
+            message: "Project deployment failed",
+            logs: deployServiceResult.log,
+          },
+          500
+        );
+      }
+    });
 
     return c.json(
       {
         status: "success",
         message: "Project deployed successfully",
-        data: deploymentResult,
+        data: {
+          deployment_id: deployServiceResult.deploymentId,
+          deployment_url: `${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}`,
+          project_url: `${c.env.SERVER_BASE_URL}/app/${deployServiceResult.appName}`,
+          project_size: deployServiceResult.projectSize,
+          time_taken: deployServiceResult.timeTaken,
+          deployment_logs: deployServiceResult.log,
+        },
       },
       200
     );

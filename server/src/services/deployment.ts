@@ -4,13 +4,30 @@ import FRAMEWORK_PROCESSORS from "./frameworks";
 import { Context } from "hono";
 import { AuthContext } from "../middlewares/auth";
 import { Bindings } from "..";
+import { v4 } from "uuid";
+import { normalizeProjectName } from "./helper";
 
 interface ProjectMeta {
+  project_app_name: string | null | unknown;
   project_name: string;
   project_description: string;
   project_framework: string;
 }
 
+interface DeploymentFlags {
+  UPDATE_PROJECT_APP_NAME?: boolean;
+  UPDATE_BASE_NAME?: boolean;
+}
+
+/**
+ * Handles project deployment and processes uploaded zip files
+ * @param {Context} c - Hono context with bindings
+ * @param {string} projectId - Unique identifier for the project
+ * @param {File} zipProjectFiles - Uploaded zip file containing project files
+ * @param {ProjectMeta} meta - Project metadata
+ * @param {DeploymentFlags} flags - Deployment flags
+ * @returns {Promise<DeploymentResult>} Deployment status and details
+ */
 class DeploymentService {
   private c: Context<{ Bindings: Bindings; Variables: AuthContext }>;
   private logString: string = "";
@@ -23,12 +40,30 @@ class DeploymentService {
   private indexHTMLEntry: AdmZip.IZipEntry | undefined = undefined;
   private indexHTMLFileBuffer: string | undefined = undefined;
   private INDEX_DOT_HTML = "index.html";
+  private FINAL_INDEX_HTML_PROCESS_RESULT: any | undefined = undefined;
+  // project variables
+  private PROJECT_APP_NAME: string = "";
+  private PROJECT_SIZE = 0;
+  private DEPLOYMENT_START_TIME = Date.now();
+  private DEPLOYMENT_END_TIME = 0;
 
-  constructor(projectId: string, zipProjectFiles: File, meta: ProjectMeta, c: Context<{ Bindings: Bindings; Variables: AuthContext }>) {
+  constructor(
+    c: Context<{ Bindings: Bindings; Variables: AuthContext }>,
+    projectId: string,
+    zipProjectFiles: File,
+    meta: ProjectMeta,
+    flags: DeploymentFlags = {
+      UPDATE_PROJECT_APP_NAME: meta.project_app_name ? false : true, // update project app name if null
+      UPDATE_BASE_NAME: false,
+    }
+  ) {
+    this.c = c;
     this.projectId = projectId;
     this.zipProjectFiles = zipProjectFiles;
     this.meta = meta;
-    this.c = c;
+    this.PROJECT_APP_NAME = flags.UPDATE_PROJECT_APP_NAME
+      ? normalizeProjectName(meta.project_name)
+      : (meta.project_app_name as string);
     this.log(`DeploymentService initialized for project ${this.projectId}`);
   }
 
@@ -36,6 +71,11 @@ class DeploymentService {
     this.logString += Date.now().toLocaleString() + ": " + message + "\n";
   }
 
+  /**
+   * Unzips the uploaded project files
+   * @returns {Promise<DeploymentService>} Deployment service instance
+   * @throws {Error} Error if unzipping fails
+    */
   async unzip() {
     try {
       // unzip the project files
@@ -61,6 +101,11 @@ class DeploymentService {
     }
   }
 
+  /**
+   * Processes the project files and uploads them to cloudinary
+   * @returns {Promise<DeploymentService>} Deployment service instance
+   * @throws {Error} Error if processing fails
+   */
   async processFiles() {
     this.log("Processing project files...");
     try {
@@ -84,30 +129,32 @@ class DeploymentService {
         }
 
         // create a file object
-        const file = new File([fileBuffer], `${fileBaseName}.${fileExtension}`, {
-          type: fileTypeConfig.type,
-        });
+        const file = new File(
+          [fileBuffer],
+          `${fileBaseName}.${fileExtension}`,
+          {
+            type: fileTypeConfig.type,
+          }
+        );
 
         // upload the file to cloudinary
-        const cloudinaryResponse = await new CloudinaryService(this.c)
-          .uploadFile(
-            await file.arrayBuffer(),
-            fileBaseName,
-            fileTypeConfig,
-            this.projectId,
-          );
+        const cloudinaryResponse = await new CloudinaryService(
+          this.c
+        ).uploadFile(
+          await file.arrayBuffer(),
+          fileBaseName,
+          fileTypeConfig,
+          this.projectId
+        );
+
         if (!cloudinaryResponse) {
           throw new Error(`Upload failed for '${filePath}'`);
         }
-        // // add the uploaded file to the list
-        // uploadableFiles[filePath] = {
-        //   file: file,
-        //   uploadMeta: {
-        //     ...cloudinaryResponse,
-        //   },
-        // };
+        
         // process index.html via the framework processor
-        this.indexHTMLFileBuffer = FRAMEWORK_PROCESSORS[this.meta.project_framework].processor(
+        this.indexHTMLFileBuffer = FRAMEWORK_PROCESSORS[
+          this.meta.project_framework
+        ].processor(
           this.indexHTMLFileBuffer as string,
           {
             [filePath]: cloudinaryResponse.secure_url,
@@ -124,6 +171,12 @@ class DeploymentService {
     }
   }
 
+  /**
+   * Processes the index.html file and uploads it to cloudinary.
+   * Updates project file paths with new cloudinary URLs
+   * @returns {Promise<DeploymentService>} Deployment service instance
+   * @throws {Error} Error if processing fails
+   */
   async processIndexHTML() {
     try {
       this.log("Processing index.html...");
@@ -133,8 +186,7 @@ class DeploymentService {
         { type: "text/html" }
       );
 
-      const cloudinaryResponse = await new CloudinaryService(this.c)
-      .uploadFile(
+      const cloudinaryResponse = await new CloudinaryService(this.c).uploadFile(
         await indexHTMLFile.arrayBuffer(),
         "index",
         allowedFileTypes.html,
@@ -146,11 +198,35 @@ class DeploymentService {
       }
 
       this.log("Processed index.html successfully.");
-      return {cloudinaryResponse, log: this.logString};
+      this.FINAL_INDEX_HTML_PROCESS_RESULT = cloudinaryResponse;
+      return this;
     } catch (error) {
       this.log(`Processing index.html failed: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Finalizes the deployment process and returns the deployment result
+   * @returns {Promise<DeploymentResult>} Deployment status and details
+   */
+  async finalize() {
+    this.log("Finalizing deployment...");
+    this.DEPLOYMENT_END_TIME = Date.now();
+    this.PROJECT_SIZE = this.zipBuffer?.byteLength ?? 0;
+    this.log("Deployment finalized.");
+    return {
+      deploymentId: v4(),
+      deploymentName: normalizeProjectName(
+        this.meta.project_name,
+        "deployment"
+      ),
+      appName: this.PROJECT_APP_NAME,
+      projectSize: this.PROJECT_SIZE,
+      timeTaken: this.DEPLOYMENT_END_TIME - this.DEPLOYMENT_START_TIME,
+      log: this.logString,
+      deploymentResult: this.FINAL_INDEX_HTML_PROCESS_RESULT,
+    };
   }
 }
 
