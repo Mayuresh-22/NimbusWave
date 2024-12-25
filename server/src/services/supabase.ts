@@ -2,6 +2,11 @@ import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 import { Context } from "hono";
 import { Bindings } from "..";
 
+/**
+ * Supabase service
+ * @param {Context<{ Bindings: Bindings; Variables: any }> c - Context} c - Context
+ * @returns {Supabase} Supabase service instance
+ */
 class Supabase {
   private supabase: SupabaseClient | null = null;
 
@@ -9,6 +14,11 @@ class Supabase {
     this.supabase = createClient(c.env.SUPABASE_URL, c.env.SUPABASE_ANON_KEY);
   }
 
+  /**
+   * Get user from token
+   * @param {string} token - User token
+   * @returns {Promise<User | null>} User details
+   */
   async getUser(token: string): Promise<User | null> {
     try {
       if (!this.supabase) {

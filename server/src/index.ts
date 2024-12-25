@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import APIEndpoint from "./api";
 import AuthMiddleware from "./middlewares/auth";
 import { cors } from "hono/cors";
+import AppEndpoint from "./api/serve_app";
 
 /*
   This is the custom binding interface to include the .dev.vars
@@ -16,12 +17,12 @@ export interface Bindings extends CloudflareBindings {
 /*
   This is the main Hono instance
 */
-const app = new Hono<{ Bindings: Bindings }>();
+const server = new Hono<{ Bindings: Bindings }>();
 
 /*
   This middlewares will be applied to all routes.
 */
-app.use(
+server.use(
   "/*",
   cors({
     origin: "*",
@@ -32,11 +33,13 @@ app.use(
     credentials: true,
   }),
 );
-app.use("/*", AuthMiddleware);
+server.use("/", AuthMiddleware);
+server.use("/api/*", AuthMiddleware);
 
 /*
   This is the route that will be used to handle all the requests.
 */
-app.route("/", APIEndpoint);
+server.route("/", APIEndpoint);
+server.route("/", AppEndpoint);
 
-export default app;
+export default server;

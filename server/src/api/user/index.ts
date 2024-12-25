@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Bindings } from "../..";
-import llmService from "../../services/llmService";
 
 const UserEndpointRequest = z.object({
   email: z.string().nonempty().email(),

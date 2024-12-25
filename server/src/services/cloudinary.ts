@@ -2,12 +2,41 @@ import { Bindings } from "..";
 import { AuthContext } from "../middlewares/auth";
 import { Context } from "hono";
 
+/**
+ * File type interface
+ * @interface FileType
+ * @property {string} type - File mime type
+ * @property {string} file - File type
+ * @property {string} ext - File extension
+ */
 interface FileType {
   type: string;
   file: string;
   ext: string;
 }
 
+/**
+ * Allowed file types for upload
+ * @type {Object}
+ * @property {FileType} html - HTML file type
+ * @property {FileType} css - CSS file type
+ * @property {FileType} js - JavaScript file type
+ * @property {FileType} ts - TypeScript file type
+ * @property {FileType} json - JSON file type
+ * @property {FileType} jpg - JPG file type
+ * @property {FileType} jpeg - JPEG file type
+ * @property {FileType} png - PNG file type
+ * @property {FileType} gif - GIF file type
+ * @property {FileType} ico - ICO file type
+ * @property {FileType} svg - SVG file type
+ * @property {FileType} webp - WEBP file type
+ * @property {FileType} avif - AVIF file type
+ * @property {FileType} mp4 - MP4 file type
+ * @property {FileType} webm - WEBM file type
+ * @property {FileType} ogg - OGG file type
+ * @property {FileType} mp3 - MP3 file type
+ * @property {FileType} wav - WAV file type
+  */
 export const allowedFileTypes: { [key: string]: FileType } = {
   html: { type: "text/html", file: "text", ext: "html" },
   css: { type: "text/css", file: "text", ext: "css" },
@@ -29,6 +58,15 @@ export const allowedFileTypes: { [key: string]: FileType } = {
   wav: { type: "audio/wav", file: "audio", ext: "wav" },
 };
 
+/**
+ * Handles file uploads to cloudinary
+ * @param {Context} c - Hono context with bindings
+ * @returns {Promise<CloudinaryService>} Cloudinary service instance
+ * @example
+ * const cloudinaryService = new CloudinaryService(c);
+ * const uploadResponse = await cloudinaryService.uploadFile(file, filename, filetypeMeta, project_id);
+ * console.log(uploadResponse);
+*/
 class CloudinaryService {
   private CLOUD_NAME: string;
   private api_key: string;

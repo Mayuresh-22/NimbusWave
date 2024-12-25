@@ -21,7 +21,8 @@ const AuthMiddleware = createMiddleware<{
     c.set("user", userAuthenticated);
     await next();
   } catch (error) {
-    return c.json({ error: "Internal Server Error, Error Code: AM_01" }, 500);
+    console.log(error);
+    return c.json({ error: "Internal Server Error, Error Code: AM_01", message: error }, 500);
   }
 });
 

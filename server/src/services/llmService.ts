@@ -8,9 +8,14 @@ interface LLMResponse {
   thought: string;
 }
 
+/**
+ * Service to send/receive LLM messages
+ * @constructor
+ * @param {string} apiKey - API key for the Groq API
+  */
 class LLMService {
   llmProvider = "groq";
-  llm = "gemma2-9b-it";
+  llm = "llama-3.1-70b-versatile";
   llmSysPrompt = `You are a helpful AI assistant of NimbusWave, an AI-powered edge deployment platform that lets users deploy and scale their JavaScript/TypeScript web apps. And you are the ai assistant that navigates users through the deployment process.
 You'll be given tools (functions) to call when required.
 
@@ -48,6 +53,14 @@ Ask next question after one is answered. (Otherwise you will be penalised)
     this.groqInstance = new Groq({ apiKey: apiKey });
   }
 
+  /**
+   * Get response from LLM
+   * @param {string} message - User message
+   * @param {ChatCompletionMessageParam[]} context - Context of the conversation
+   * @returns {Promise<LLMResponse>} Response
+   * @throws {Error} Error
+   * @async 
+  */
   async getLLMResponse(
     message: string,
     context: ChatCompletionMessageParam[],
