@@ -5,7 +5,7 @@ import type { Bindings } from "..";
 import type { AuthContext } from "../middlewares/auth";
 import CloudinaryService, { allowedFileTypes } from "./cloudinary";
 import FRAMEWORK_PROCESSORS from "./frameworks";
-import { normalizeProjectName } from "./helper";
+import { getSQLDateTimeNow, normalizeProjectName } from "./helper";
 
 interface ProjectMeta {
   project_app_name: string | null | unknown;
@@ -68,7 +68,7 @@ class DeploymentService {
   }
 
   private log(message: string) {
-    this.logString += Date.now().toLocaleString() + ": " + message + "\n";
+    this.logString += getSQLDateTimeNow() + ": " + message + "\n";
   }
 
   /**
@@ -127,7 +127,7 @@ class DeploymentService {
           this.log(`Skipping file ${filePath}`);
           continue;
         }
-
+        console.log("Processing file: ", filePath);
         // create a file object
         const file = new File(
           [fileBuffer],
@@ -146,8 +146,8 @@ class DeploymentService {
           fileTypeConfig,
           this.projectId,
         );
-
-        if (!cloudinaryResponse) {
+        console.log("Cloudinary response: ", JSON.stringify(cloudinaryResponse, null, 2));
+        if (cloudinaryResponse?.error || !cloudinaryResponse) {
           throw new Error(`Upload failed for '${filePath}'`);
         }
 
