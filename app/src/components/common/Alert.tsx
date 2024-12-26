@@ -10,7 +10,7 @@ export default function Alert({
   const [hide, setHide] = useState(false);
 
   useEffect(() => {
-    if (hide) {
+    if (!hide) {
       setTimeout(() => {
         setHide(false);
       }, 5000);

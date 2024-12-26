@@ -34,9 +34,9 @@ export default function ChatPage() {
     },
   ]);
   const [zipProjectFiles, setZipProjectFiles] = useState<File | null>(null);
-  const [projectName, setProjectName] = useState<string>("test");
-  const [projectFramework, setProjectFramework] = useState<string>("test");
-  const [projectDescription, setProjectDescription] = useState<string>("test");
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectFramework, setProjectFramework] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>("");
   const [projectStatus, setProjectStatus] = useState<0 | 1>(0);
 
   const scrollToBottom = () => {
@@ -46,6 +46,27 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const validateProjectDetails = (): boolean => {
+    // validate project details
+    if (!projectName.trim()) {
+      setAlert({ type: "error", message: "Project name is required." });
+      return false;
+    }
+    if (!projectFramework.trim()) {
+      setAlert({ type: "error", message: "Project framework is required." });
+      return false;
+    }
+    if (!projectDescription.trim()) {
+      setAlert({ type: "error", message: "Project description is required." });
+      return false;
+    }
+    if (!zipProjectFiles) {
+      setAlert({ type: "error", message: "Project files are required." });
+      return false;
+    }
+    return true;
+  };
 
   const handleSend = async (triggeredByUser: boolean = true) => {
     if (!input.trim()) {
@@ -91,6 +112,8 @@ export default function ChatPage() {
   };
 
   const initDeployment = async () => {
+    if (!validateProjectDetails()) return
+
     // make request to server to start deployment
     const deployResponse = await deploy.deployProject(
       project?.projectID as string,
@@ -221,11 +244,10 @@ export default function ChatPage() {
             {/* Upload area */}
             <div
               onClick={handleFileBrowse}
-              className={`p-8 border-2 border-dashed rounded-lg text-center transition-colors cursor-pointer ${
-                isDragging
-                  ? "border-white bg-gray-900"
-                  : "border-gray-800 hover:border-gray-700"
-              }`}
+              className={`p-8 border-2 border-dashed rounded-lg text-center transition-colors cursor-pointer ${isDragging
+                ? "border-white bg-gray-900"
+                : "border-gray-800 hover:border-gray-700"
+                }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -253,9 +275,8 @@ export default function ChatPage() {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex items-start space-x-3 ${
-                  message.role === "assistant" ? "justify-start" : "justify-end"
-                }`}
+                className={`flex items-start space-x-3 ${message.role === "assistant" ? "justify-start" : "justify-end"
+                  }`}
               >
                 {message.role === "assistant" && (
                   <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
@@ -263,11 +284,10 @@ export default function ChatPage() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-xl px-4 py-2 ${
-                    message.role === "assistant"
-                      ? "bg-gray-900"
-                      : "bg-gray-300 text-black"
-                  }`}
+                  className={`max-w-[80%] rounded-xl px-4 py-2 ${message.role === "assistant"
+                    ? "bg-gray-900"
+                    : "bg-gray-300 text-black"
+                    }`}
                 >
                   {message.content}
                 </div>
