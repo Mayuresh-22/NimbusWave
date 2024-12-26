@@ -7,8 +7,8 @@
     "server"
   ],
   "scripts": {
-    "dev": "npm --parallel run dev",
-    "build": "npm --recursive run build",
+    "dev": "npm run dev:app && npm run dev:server",
+    "build": "npm run build:app && npm run build:server",
     "dev:app": "cd app && npm run dev",
     "dev:server": "cd server && npm run dev",
     "build:app": "cd app && npm run build",
