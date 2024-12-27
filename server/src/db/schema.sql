@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS projects (
   project_status BOOLEAN default 0, -- 0 = not deployed, 1 = deployed
   project_type TEXT default 'private',
   project_size NUMERIC, -- in bytes
+  project_files_meta TEXT, -- metadata of files
   entry_file_path TEXT, -- path to main entry file index.html
   is_temp BOOLEAN default 1, -- 0 = not temporary, 1 = temporary
   chat_id TEXT NOT NULL,

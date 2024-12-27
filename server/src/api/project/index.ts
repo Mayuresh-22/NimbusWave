@@ -6,7 +6,8 @@ import { z } from "zod";
 import type { Bindings } from "../..";
 import type { AuthContext } from "../../middlewares/auth";
 import { UserCreditsMiddleware } from "../../middlewares/userCredits";
-import DeploymentService, { ProjectFilesMeta } from "../../services/deployment";
+import type { ProjectFilesMeta } from "../../services/deployment";
+import DeploymentService from "../../services/deployment";
 import FRAMEWORK_PROCESSORS from "../../services/frameworks";
 
 interface ProjectDeploymentRequestVars {
@@ -26,7 +27,19 @@ const CreateProjectReqSchema = z.object({
 
 const DeployProjectReqSchema = z
   .object({
-    file: z.string().nonempty(),
+    file: z
+      .instanceof(File)
+      .refine(
+        (file) => file.size <= 1 * 1024 * 1024,
+        "File size should be less than 1MB",
+      )
+      .refine(
+        (file) =>
+          ["application/zip", "application/x-zip-compressed"].includes(
+            file.type,
+          ),
+        "Invalid file type",
+      ),
     project_id: z.string().nonempty(),
     project_name: z.string().nonempty().max(20),
     project_description: z.string().nonempty().max(100),
@@ -42,6 +55,7 @@ const ProjectEndpoint = new Hono<{
 }>();
 
 /*
+  -------------------------- Middleware(s) --------------------------
   Mount middlewares on certain routes
 */
 ProjectEndpoint.use("/project/deploy", UserCreditsMiddleware);
@@ -181,7 +195,9 @@ ProjectEndpoint.post(
     };
 
     // check if the file is a zip file
-    const isValidZipFile = deploymentReqVars.zipFile.type === "application/zip" || deploymentReqVars.zipFile.type === "application/x-zip-compressed";
+    const isValidZipFile =
+      deploymentReqVars.zipFile.type === "application/zip" ||
+      deploymentReqVars.zipFile.type === "application/x-zip-compressed";
     if (!isValidZipFile) {
       return c.json(
         {
@@ -227,12 +243,15 @@ ProjectEndpoint.post(
           project_description: deploymentReqVars.projectDescription,
           project_framework: deploymentReqVars.projectFramework,
         },
-        existingProject.project_file_meta as ProjectFilesMeta,
+        JSON.parse(
+          existingProject.project_files_meta as string,
+        ) as ProjectFilesMeta,
       )
         .unzip()
         .then((deploymentInstance) => deploymentInstance.processFiles())
         .then((deploymentInstance) => deploymentInstance.processIndexHTML())
         .then((deploymentInstance) => deploymentInstance.finalize());
+      console.log(deployServiceResult.projectFilesDict);
 
       /*
         Insert deployment details into the database & update project details
@@ -253,7 +272,7 @@ ProjectEndpoint.post(
         ),
         c.env.DB.prepare(
           `UPDATE projects SET project_name = ?, project_app_name = ?, project_framework = ?, 
-        project_description = ?, project_status = 1, project_size = ?, entry_file_path = ?, 
+        project_description = ?, project_status = 1, project_size = ?, project_files_meta = ?, entry_file_path = ?, 
         is_temp = 0 WHERE project_id = ? AND user_id = ?`,
         ).bind(
           deploymentReqVars.projectName,
@@ -261,6 +280,7 @@ ProjectEndpoint.post(
           deploymentReqVars.projectFramework,
           deploymentReqVars.projectDescription,
           deployServiceResult.projectSize,
+          deployServiceResult.projectFilesDict,
           deployServiceResult.deploymentResult.secure_url,
           deploymentReqVars.projectId,
           c.var.user.id,
@@ -298,11 +318,13 @@ ProjectEndpoint.post(
         200,
       );
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       return c.json(
         {
           status: "error",
           message: "Project deployment failed",
-          logs: error.message,
+          logs: errorMessage,
         },
         500,
       );
