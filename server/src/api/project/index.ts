@@ -6,8 +6,16 @@ import { z } from "zod";
 import type { Bindings } from "../..";
 import type { AuthContext } from "../../middlewares/auth";
 import { UserCreditsMiddleware } from "../../middlewares/userCredits";
-import DeploymentService from "../../services/deployment";
+import DeploymentService, { ProjectFilesMeta } from "../../services/deployment";
 import FRAMEWORK_PROCESSORS from "../../services/frameworks";
+
+interface ProjectDeploymentRequestVars {
+  zipFile: File;
+  projectId: string;
+  projectName: string;
+  projectDescription: string;
+  projectFramework: string;
+}
 
 const CreateProjectReqSchema = z.object({
   default: z.boolean(),
@@ -18,6 +26,7 @@ const CreateProjectReqSchema = z.object({
 
 const DeployProjectReqSchema = z
   .object({
+    file: z.string().nonempty(),
     project_id: z.string().nonempty(),
     project_name: z.string().nonempty().max(20),
     project_description: z.string().nonempty().max(100),
@@ -163,17 +172,17 @@ ProjectEndpoint.post(
   zValidator("form", DeployProjectReqSchema),
   async (c) => {
     const body = await c.req.formData();
-    const zipProjectFiles: File = body.get("file") as File;
-    const projectId = body.get("project_id") as string;
-    const projectName = body.get("project_name") as string;
-    const projectDescription = body.get("project_description") as string;
-    const projectFramework = body.get("project_framework") as string;
+    const deploymentReqVars: ProjectDeploymentRequestVars = {
+      zipFile: body.get("file") as File,
+      projectId: body.get("project_id") as string,
+      projectName: body.get("project_name") as string,
+      projectDescription: body.get("project_description") as string,
+      projectFramework: body.get("project_framework") as string,
+    };
 
     // check if the file is a zip file
-    if (
-      zipProjectFiles.type !== "application/x-zip-compressed" &&
-      zipProjectFiles.type !== "application/zip"
-    ) {
+    const isValidZipFile = deploymentReqVars.zipFile.type === "application/zip" || deploymentReqVars.zipFile.type === "application/x-zip-compressed";
+    if (!isValidZipFile) {
       return c.json(
         {
           status: "error",
@@ -182,11 +191,12 @@ ProjectEndpoint.post(
         400,
       );
     }
+
     // check if project exists
     const existingProject = await c.env.DB.prepare(
       "SELECT * FROM projects WHERE project_id = ? AND user_id = ?",
     )
-      .bind(projectId, c.var.user.id)
+      .bind(deploymentReqVars.projectId, c.var.user.id)
       .first();
 
     if (!existingProject) {
@@ -206,85 +216,97 @@ ProjectEndpoint.post(
       UPDATE_PROJECT_APP_NAME: update project app name if null (default: true)
       UPDATE_BASE_NAME: update base name if null (default: false)
     */
-    const deployServiceResult = await new DeploymentService(
-      c,
-      projectId,
-      zipProjectFiles,
-      {
-        project_app_name: existingProject.project_app_name,
-        project_name: projectName,
-        project_description: projectDescription,
-        project_framework: projectFramework,
-      },
-    )
-      .unzip()
-      .then((deploymentInstance) => deploymentInstance.processFiles())
-      .then((deploymentInstance) => deploymentInstance.processIndexHTML())
-      .then((deploymentInstance) => deploymentInstance.finalize());
+    try {
+      const deployServiceResult = await new DeploymentService(
+        c,
+        deploymentReqVars.projectId,
+        deploymentReqVars.zipFile,
+        {
+          project_app_name: existingProject.project_app_name,
+          project_name: deploymentReqVars.projectName,
+          project_description: deploymentReqVars.projectDescription,
+          project_framework: deploymentReqVars.projectFramework,
+        },
+        existingProject.project_file_meta as ProjectFilesMeta,
+      )
+        .unzip()
+        .then((deploymentInstance) => deploymentInstance.processFiles())
+        .then((deploymentInstance) => deploymentInstance.processIndexHTML())
+        .then((deploymentInstance) => deploymentInstance.finalize());
 
-    /*
-      Insert deployment details into the database & update project details
-      TODO: add value for deployment_url column, construct url in following format:
-      ${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}
-    */
-    const deployQueryResults = await c.env.DB.batch([
-      c.env.DB.prepare(
-        `INSERT INTO deployments (deployment_id, project_id, 
+      /*
+        Insert deployment details into the database & update project details
+        TODO: add value for deployment_url column, construct url in following format:
+        ${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}
+      */
+      const deployQueryResults = await c.env.DB.batch([
+        c.env.DB.prepare(
+          `INSERT INTO deployments (deployment_id, project_id, 
         deployment_status, deployment_logs, deployment_size, time_taken) 
         VALUES (?, ?, 1, ?, ?, ?)`,
-      ).bind(
-        deployServiceResult.deploymentId,
-        projectId,
-        deployServiceResult.log,
-        deployServiceResult.projectSize,
-        deployServiceResult.timeTaken,
-      ),
-      c.env.DB.prepare(
-        `UPDATE projects SET project_name = ?, project_app_name = ?, project_framework = ?, 
+        ).bind(
+          deployServiceResult.deploymentId,
+          deploymentReqVars.projectId,
+          deployServiceResult.log,
+          deployServiceResult.projectSize,
+          deployServiceResult.timeTaken,
+        ),
+        c.env.DB.prepare(
+          `UPDATE projects SET project_name = ?, project_app_name = ?, project_framework = ?, 
         project_description = ?, project_status = 1, project_size = ?, entry_file_path = ?, 
         is_temp = 0 WHERE project_id = ? AND user_id = ?`,
-      ).bind(
-        projectName,
-        deployServiceResult.appName,
-        projectFramework,
-        projectDescription,
-        deployServiceResult.projectSize,
-        deployServiceResult.deploymentResult.secure_url,
-        projectId,
-        c.var.user.id,
-      ),
-    ]);
-    /*
-      Check if the deployment was successful and the changes were made in the database
-    */
-    deployQueryResults.map((queryResult) => {
-      if (queryResult.success !== true && queryResult.meta.changes !== 1) {
-        return c.json(
-          {
-            status: "error",
-            message: "Project deployment failed",
-            logs: deployServiceResult.log,
-          },
-          500,
-        );
-      }
-    });
+        ).bind(
+          deploymentReqVars.projectName,
+          deployServiceResult.appName,
+          deploymentReqVars.projectFramework,
+          deploymentReqVars.projectDescription,
+          deployServiceResult.projectSize,
+          deployServiceResult.deploymentResult.secure_url,
+          deploymentReqVars.projectId,
+          c.var.user.id,
+        ),
+      ]);
+      /*
+        Check if the deployment was successful and the changes were made in the database
+      */
+      deployQueryResults.map((queryResult) => {
+        if (queryResult.success !== true && queryResult.meta.changes !== 1) {
+          return c.json(
+            {
+              status: "error",
+              message: "Project deployment failed",
+              logs: deployServiceResult.log,
+            },
+            500,
+          );
+        }
+      });
 
-    return c.json(
-      {
-        status: "success",
-        message: "Project deployed successfully",
-        data: {
-          deployment_id: deployServiceResult.deploymentId,
-          deployment_url: `${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}`,
-          project_url: `${c.env.SERVER_BASE_URL}/app/${deployServiceResult.appName}`,
-          project_size: deployServiceResult.projectSize,
-          time_taken: deployServiceResult.timeTaken,
-          deployment_logs: deployServiceResult.log,
+      return c.json(
+        {
+          status: "success",
+          message: "Project deployed successfully",
+          data: {
+            deployment_id: deployServiceResult.deploymentId,
+            deployment_url: `${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}`,
+            project_url: `${c.env.SERVER_BASE_URL}/app/${deployServiceResult.appName}`,
+            project_size: deployServiceResult.projectSize,
+            time_taken: deployServiceResult.timeTaken,
+            deployment_logs: deployServiceResult.log,
+          },
         },
-      },
-      200,
-    );
+        200,
+      );
+    } catch (error) {
+      return c.json(
+        {
+          status: "error",
+          message: "Project deployment failed",
+          logs: error.message,
+        },
+        500,
+      );
+    }
   },
 );
 
