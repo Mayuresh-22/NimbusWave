@@ -2,60 +2,142 @@ import type { Context } from "hono";
 import type { Bindings } from "..";
 import type { AuthContext } from "../middlewares/auth";
 
-/**
- * File type interface
- * @interface FileType
- * @property {string} type - File mime type
- * @property {string} file - File type
- * @property {string} ext - File extension
- */
-interface FileType {
-  type: string;
-  file: string;
-  ext: string;
+export enum FileCategory {
+  Document = "document",
+  Image = "image",
+  Video = "video",
+  Audio = "audio",
+  Script = "script",
+  Style = "style",
+  Data = "data",
 }
 
 /**
- * Allowed file types for upload
- * @type {Object}
- * @property {FileType} html - HTML file type
- * @property {FileType} css - CSS file type
- * @property {FileType} js - JavaScript file type
- * @property {FileType} ts - TypeScript file type
- * @property {FileType} json - JSON file type
- * @property {FileType} jpg - JPG file type
- * @property {FileType} jpeg - JPEG file type
- * @property {FileType} png - PNG file type
- * @property {FileType} gif - GIF file type
- * @property {FileType} ico - ICO file type
- * @property {FileType} svg - SVG file type
- * @property {FileType} webp - WEBP file type
- * @property {FileType} avif - AVIF file type
- * @property {FileType} mp4 - MP4 file type
- * @property {FileType} webm - WEBM file type
- * @property {FileType} ogg - OGG file type
- * @property {FileType} mp3 - MP3 file type
- * @property {FileType} wav - WAV file type
+ * media type interface
+ * @interface MediaType
+ * @property {string} mimeType - File mime type
+ * @property {string} category - File type
+ * @property {string} extension - File extension
  */
-export const allowedFileTypes: { [key: string]: FileType } = {
-  html: { type: "text/html", file: "text", ext: "html" },
-  css: { type: "text/css", file: "text", ext: "css" },
-  js: { type: "text/javascript", file: "text", ext: "js" },
-  ts: { type: "text/typescript", file: "text", ext: "ts" },
-  json: { type: "application/json", file: "text", ext: "json" },
-  jpg: { type: "image/jpeg", file: "image", ext: "jpg" },
-  jpeg: { type: "image/jpeg", file: "image", ext: "jpeg" },
-  png: { type: "image/png", file: "image", ext: "png" },
-  gif: { type: "image/gif", file: "image", ext: "gif" },
-  ico: { type: "image/x-icon", file: "image", ext: "ico" },
-  svg: { type: "image/svg+xml", file: "image", ext: "svg" },
-  webp: { type: "image/webp", file: "image", ext: "webp" },
-  avif: { type: "image/avif", file: "image", ext: "avif" },
-  mp4: { type: "video/mp4", file: "video", ext: "mp4" },
-  webm: { type: "video/webm", file: "video", ext: "webm" },
-  ogg: { type: "video/ogg", file: "video", ext: "ogg" },
-  mp3: { type: "audio/mpeg", file: "audio", ext: "mp3" },
-  wav: { type: "audio/wav", file: "audio", ext: "wav" },
+interface MediaType {
+  mimeType: string;
+  category: FileCategory;
+  extension: string;
+}
+
+/**
+ * Supported file types for upload
+ * @type {Object}
+ * @property {MediaType} html - HTML file type
+ * @property {MediaType} css - CSS file type
+ * @property {MediaType} js - JavaScript file type
+ * @property {MediaType} ts - TypeScript file type
+ * @property {MediaType} json - JSON file type
+ * @property {MediaType} jpg - JPG file type
+ * @property {MediaType} jpeg - JPEG file type
+ * @property {MediaType} png - PNG file type
+ * @property {MediaType} gif - GIF file type
+ * @property {MediaType} ico - ICO file type
+ * @property {MediaType} svg - SVG file type
+ * @property {MediaType} webp - WEBP file type
+ * @property {MediaType} avif - AVIF file type
+ * @property {MediaType} mp4 - MP4 file type
+ * @property {MediaType} webm - WEBM file type
+ * @property {MediaType} ogg - OGG file type
+ * @property {MediaType} mp3 - MP3 file type
+ * @property {MediaType} wav - WAV file type
+ */
+export const SUPPORTED_MEDIA_TYPES: Record<string, MediaType> = {
+  html: {
+    mimeType: "text/html",
+    category: FileCategory.Document,
+    extension: "html",
+  },
+  css: {
+    mimeType: "text/css",
+    category: FileCategory.Style,
+    extension: "css",
+  },
+  js: {
+    mimeType: "application/javascript",
+    category: FileCategory.Script,
+    extension: "js",
+  },
+  ts: {
+    mimeType: "application/typescript",
+    category: FileCategory.Script,
+    extension: "ts",
+  },
+  json: {
+    mimeType: "application/json",
+    category: FileCategory.Data,
+    extension: "json",
+  },
+  jpg: {
+    mimeType: "image/jpeg",
+    category: FileCategory.Image,
+    extension: "jpg",
+  },
+  jpeg: {
+    mimeType: "image/jpeg",
+    category: FileCategory.Image,
+    extension: "jpeg",
+  },
+  png: {
+    mimeType: "image/png",
+    category: FileCategory.Image,
+    extension: "png",
+  },
+  gif: {
+    mimeType: "image/gif",
+    category: FileCategory.Image,
+    extension: "gif",
+  },
+  ico: {
+    mimeType: "image/x-icon",
+    category: FileCategory.Image,
+    extension: "ico",
+  },
+  svg: {
+    mimeType: "image/svg+xml",
+    category: FileCategory.Image,
+    extension: "svg",
+  },
+  webp: {
+    mimeType: "image/webp",
+    category: FileCategory.Image,
+    extension: "webp",
+  },
+  avif: {
+    mimeType: "image/avif",
+    category: FileCategory.Image,
+    extension: "avif",
+  },
+  mp4: {
+    mimeType: "video/mp4",
+    category: FileCategory.Video,
+    extension: "mp4",
+  },
+  webm: {
+    mimeType: "video/webm",
+    category: FileCategory.Data,
+    extension: "webm",
+  },
+  ogg: {
+    mimeType: "video/ogg",
+    category: FileCategory.Data,
+    extension: "ogg",
+  },
+  mp3: {
+    mimeType: "audio/mp3",
+    category: FileCategory.Audio,
+    extension: "mp3",
+  },
+  wav: {
+    mimeType: "audio/wav",
+    category: FileCategory.Audio,
+    extension: "wav",
+  },
 };
 
 /**
@@ -82,14 +164,14 @@ class CloudinaryService {
   async uploadFile(
     file: ArrayBuffer,
     filename: string,
-    filetypeMeta: FileType,
-    project_id: string,
+    filetypeMeta: MediaType,
+    project_id: string
   ): Promise<any> {
     try {
       const formData = new FormData();
       formData.append("file", new Blob([file]));
       !this.isImageFile(filetypeMeta) &&
-        formData.append("public_id", `${filename}.${filetypeMeta.ext}`);
+        formData.append("public_id", `${filename}.${filetypeMeta.extension}`);
       formData.append("asset_folder", `${this.ROOT_ASSETS_PATH}/${project_id}`);
       formData.append("upload_preset", "nimbus_projectfiles");
 
@@ -98,7 +180,7 @@ class CloudinaryService {
         {
           method: "POST",
           body: formData,
-        },
+        }
       );
       const data = await uploadResponse.json();
       return data;
@@ -108,8 +190,30 @@ class CloudinaryService {
     }
   }
 
-  isImageFile(fileTypeMeta: FileType) {
-    return fileTypeMeta.file === "image";
+  async deleteFile(public_id: string): Promise<any> {
+    try {
+      const deleteResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${this.CLOUD_NAME}/auto/delete_by_token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            public_id,
+          }),
+        }
+      );
+      const data = await deleteResponse.json();
+      return data;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  isImageFile(fileTypeMeta: MediaType) {
+    return fileTypeMeta.category === FileCategory.Image;
   }
 }
 
