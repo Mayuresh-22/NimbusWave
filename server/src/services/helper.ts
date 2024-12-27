@@ -5,8 +5,8 @@ import { v4 } from "uuid";
  * Get the current SQL DateTime
  * @returns SQL DateTime string
  */
-export const getSQLDateTimeNow = () => {
-  return moment().format("YYYY-MM-DD HH:mm:ss");
+export const getSQLDateTimeNow = (milliseconds?: boolean) => {
+  return moment().format(`YYYY-MM-DD HH:mm:ss${milliseconds ? ".ssss" : ""}`);
 };
 
 /**
