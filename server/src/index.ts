@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { cors } from "hono/cors";
 import APIEndpoint from "./api";
 import AppEndpoint from "./api/serve_app";
@@ -22,6 +23,22 @@ const server = new Hono<{ Bindings: Bindings }>();
 /*
   This middlewares will be applied to all routes.
 */
+server.get(
+  "/api/user/*",
+  cache({
+    cacheName: "NimbusWave",
+    cacheControl: "private, max-age=14400", // 4 hours
+  }),
+);
+
+server.get(
+  "/app/*",
+  cache({
+    cacheName: "NimbusWave",
+    cacheControl: "private, max-age=21600", // 6 hours
+  }),
+);
+
 server.use(
   "/*",
   cors({
@@ -29,7 +46,6 @@ server.use(
     allowHeaders: ["Authorization", "Content-Type", "Accept"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
-    maxAge: 600,
     credentials: true,
   }),
 );

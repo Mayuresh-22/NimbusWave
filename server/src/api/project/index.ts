@@ -25,29 +25,30 @@ const CreateProjectReqSchema = z.object({
   project_framework: z.string().nonempty().max(10).optional(),
 });
 
-const DeployProjectReqSchema = z
-  .object({
-    file: z
-      .instanceof(File)
-      .refine(
-        (file) => file.size <= 1 * 1024 * 1024,
-        "File size should be less than 1MB",
-      )
-      .refine(
-        (file) =>
-          ["application/zip", "application/x-zip-compressed"].includes(
-            file.type,
-          ),
-        "Invalid file type",
-      ),
-    project_id: z.string().nonempty(),
-    project_name: z.string().nonempty().max(20),
-    project_description: z.string().nonempty().max(100),
-    project_framework: z.string().nonempty().max(10),
-  })
-  .refine((project) => project.project_framework in FRAMEWORK_PROCESSORS, {
-    message: "Project framework is invalid or not supported",
-  });
+const DeployProjectReqSchema = z.object({
+  file: z
+    .instanceof(File)
+    .refine(
+      (file) => file.size <= 1 * 1024 * 1024,
+      "File size should be less than 1MB",
+    )
+    .refine(
+      (file) =>
+        ["application/zip", "application/x-zip-compressed"].includes(file.type),
+      "Invalid file type",
+    ),
+  project_id: z.string().nonempty(),
+  project_name: z.string().nonempty().max(20),
+  project_description: z.string().nonempty().max(150),
+  project_framework: z
+    .string()
+    .nonempty()
+    .max(10)
+    .refine((project_framework) => project_framework in FRAMEWORK_PROCESSORS, {
+      message: "Project framework is invalid or not supported",
+    }),
+  redeploy: z.boolean().optional().default(false),
+});
 
 const ProjectEndpoint = new Hono<{
   Bindings: Bindings;
@@ -308,7 +309,6 @@ ProjectEndpoint.post(
           message: "Project deployed successfully",
           data: {
             deployment_id: deployServiceResult.deploymentId,
-            deployment_url: `${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}`,
             project_url: `${c.env.SERVER_BASE_URL}/app/${deployServiceResult.appName}`,
             project_size: deployServiceResult.projectSize,
             time_taken: deployServiceResult.timeTaken,

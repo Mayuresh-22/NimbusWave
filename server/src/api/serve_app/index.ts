@@ -27,9 +27,12 @@ AppEndpoint.get("/app/:app_name/*", async (c) => {
   if (!projectResult) {
     return c.html(DEPLOYMENT_NOT_FOUND_HTML);
   }
-  const appHTML = await fetch(projectResult.entry_file_path as string).then(
-    (res) => res.text(),
-  );
+  const appHTML = await fetch(projectResult.entry_file_path as string, {
+    headers: {
+      "Content-Type": "text/html",
+      "Cache-Control": "max-age=21600",
+    },
+  }).then((res) => res.text());
   return c.html(appHTML);
 });
 
