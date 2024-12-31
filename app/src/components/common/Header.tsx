@@ -51,12 +51,19 @@ export function Header() {
             >
               Login
             </Link>
-          ) : (
+          ) : location.pathname !== "/dashboard" ? (
             <Link
               to="/dashboard"
               className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
             >
-              Dashboard
+              Go to Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/deploy"
+              className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Deploy New
             </Link>
           )}
         </nav>
@@ -82,12 +89,14 @@ export function Header() {
                 Login
               </Link>
             ) : (
-              <Link
-                to="/onboard"
-                className="text-sm hover:text-gray-300 transition-colors"
-              >
-                Dashboard
-              </Link>
+              location.pathname !== "/dashboard" && (
+                <Link
+                  to="/dashboard"
+                  className="text-sm hover:text-gray-300 transition-colors"
+                >
+                  Go to Dashboard
+                </Link>
+              )
             )}
           </nav>
         </div>
