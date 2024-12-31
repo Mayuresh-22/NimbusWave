@@ -27,7 +27,7 @@ server.get(
   "/api/user/*",
   cache({
     cacheName: "NimbusWave",
-    cacheControl: "private, max-age=14400", // 4 hours
+    cacheControl: "no-cache no-store",
   }),
 );
 
