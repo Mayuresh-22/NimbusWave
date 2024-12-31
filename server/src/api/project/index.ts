@@ -5,7 +5,10 @@ import { v4 } from "uuid";
 import { z } from "zod";
 import type { Bindings } from "../..";
 import type { AuthContext } from "../../middlewares/auth";
-import { UserCreditsMiddleware } from "../../middlewares/userCredits";
+import {
+  UserDeploymentCreditsMiddleware,
+  UserProjectCreditsMiddleware,
+} from "../../middlewares/userCredits";
 import type { ProjectFilesMeta } from "../../services/deployment";
 import DeploymentService from "../../services/deployment";
 import FRAMEWORK_PROCESSORS from "../../services/frameworks";
@@ -59,7 +62,8 @@ const ProjectEndpoint = new Hono<{
   -------------------------- Middleware(s) --------------------------
   Mount middlewares on certain routes
 */
-ProjectEndpoint.use("/project/deploy", UserCreditsMiddleware);
+ProjectEndpoint.post("/project", UserProjectCreditsMiddleware);
+ProjectEndpoint.use("/project/deploy", UserDeploymentCreditsMiddleware);
 
 /*
   -------------------------- /project/* --------------------------
