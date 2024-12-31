@@ -30,6 +30,15 @@ class UserService extends BaseService {
       return null;
     }
   }
+
+  async getUserDashboard(): Promise<any | null> {
+    try {
+      const response = await this.server.get("/api/user/dashboard");
+      return response.data;
+    } catch (error) {
+      return null;
+    }
+  }
 }
 
 export default new UserService();
