@@ -55,6 +55,11 @@ export default function Navigator() {
             created_at: new Date(project.created_at).toLocaleString(),
           });
         });
+        userDeployments.sort((a, b) => {
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        });
         dispatch(setProjects(userProjects));
         dispatch(setDeployments(userDeployments));
         dispatch(setNumOfProjects(dashboard.data.no_of_projects));
