@@ -1,16 +1,13 @@
 import type { LucideProps } from "lucide-react";
 import {
-  Rocket,
   ChevronRight,
   LockIcon,
   LockKeyholeOpen,
   ExternalLink,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router";
-import { Deployment, Project } from "../store/dashboardSlice";
 import type { RootState } from "../store/store";
 
 export default function DashboardPage() {
@@ -69,7 +66,7 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-semibold mb-4">
                 Recent Deployments
               </h2>
-              <div className="rounded-lg border border-gray-800">
+              <div className="min-h-[650px] max-h-[650px] rounded-lg border border-gray-800 overflow-y-auto overflow-x-hidden">
                 <div className="p-6">
                   <div className="space-y-5">
                     {recentDeployments?.map((deployment) => (
@@ -108,7 +105,7 @@ export default function DashboardPage() {
             {/* Active Projects */}
             <div>
               <h2 className="text-2xl font-semibold mb-4">Your Projects</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="min-h-[650px] max-h-[650px] p-3 overflow-y-auto overflow-x-hidden rounded-lg border border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {projects?.map((project) => (
                   <div
                     key={project.project_id}
