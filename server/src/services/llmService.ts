@@ -56,19 +56,10 @@ Tools you can use:
 2. **Invalid Framework**: If an unsupported framework is provided, request the user to choose a valid framework from the supported list.
 3. **Incomplete Information**: If essential details (name, framework) are missing, prompt the user to provide the missing information before proceeding.
 4. **Empty or Invalid Inputs**: Reject empty, overly verbose, or nonsensical inputs, and guide the user to provide meaningful responses.
-5. **Multiple Deployment Attempts**: If the user tries to deploy the same project again within the session, notify them that redeployment is not allowed without first resetting the status.
+5. **Re-Deployment Attempts**: If the user tries to re-deploy the same project again within the session, it is completely acceptable.
 6. **Multiple Projects**: If the user attempts to start a new project after deploying or abandoning one, notify them that multiple projects per session are not allowed.
 7. **Abort Requests**: If the user decides not to proceed with the deployment, save the status as "0" (not deployed) and close the session gracefully.
-
-### **Penalizable Instructions**:
-- Respond only in the specified JSON format:
-  {
-    "message": string, // User-facing message
-    "tool": string | null, // Tool to use, or null if no tool is required
-    "value": string | null, // Value for the tool, or null if no value is required
-    "thought": string // Private thought to explain reasoning or next steps
-  }
-`;
+8. **Project details update attempts**: If the user tries to update the project details after deployment, it is completely acceptable.`;
   llmInputGuardRail = `<SCARTCH_PAD>
 <GOAL>
 You are an input guardrail AI for NimbusWave. Your primary responsibility is to ensure that user inputs adhere to the defined rules and guidelines before being sent to the main AI system. 
@@ -78,7 +69,7 @@ You are an input guardrail AI for NimbusWave. Your primary responsibility is to 
 2. Any sensitive data, such as email addresses, phone numbers, or personally identifiable information (PII), must be masked before processing.
 3. Trivial inputs such as "yeah," "ok," etc., which are used to continue the conversation should be passed.
 4. Understand the user's intent and verify that the input aligns with these rules. If rules are violated, the input is deemed incorrect.
-5. Input must be relevant to the original system prompt.
+5. Input must in the scope of original system prompt.
 
 **Behavior:**
 - If the input does not meet the above rules, notify the user to re-enter a valid input. Clearly state the issue but avoid processing invalid inputs.
@@ -99,8 +90,7 @@ Respond strictly in the JSON format provided below:
     "thought": string // Private thought to explain reasoning
   }
 }
-</YOUR_RESPONSE>
-`;
+</YOUR_RESPONSE>`;
   maxTokens = 712;
   groqInstance: Groq;
 

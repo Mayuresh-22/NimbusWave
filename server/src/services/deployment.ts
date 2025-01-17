@@ -68,10 +68,7 @@ class DeploymentService {
     zipProjectFiles: File,
     projectMeta: ProjectVars,
     storedProjectFilesDict: ProjectFilesMeta | null,
-    flags: DeploymentFlags = {
-      UPDATE_PROJECT_APP_NAME: projectMeta.project_app_name ? false : true, // update project app name if null
-      UPDATE_BASE_NAME: false,
-    },
+    flags: DeploymentFlags,
   ) {
     this.c = c;
     this.projectId = projectId;

@@ -1,0 +1,22 @@
+# Server Configuration
+# Format: string, required
+SERVER_BASE_URL="http://127.0.0.1:8787"
+SERVER_PORT=8787
+
+# Supabase Configuration
+# Format: JWT token string, required
+SUPABASE_ANON_KEY="your_supabase_anon_key_here"
+# Format: URL string, required
+SUPABASE_URL="your_supabase_project_url"
+
+# Groq API Configuration
+# Format: string starting with 'gsk_', required
+GROQ_API_KEY="your_groq_api_key_here"
+
+# Cloudinary Configuration
+# Format: string, required
+CLOUDINARY_CLOUD_NAME="your_cloud_name"
+# Format: numeric string, required
+CLOUDINARY_API_KEY="your_api_key"
+# Format: string, required
+CLOUDINARY_API_SECRET="your_api_secret"

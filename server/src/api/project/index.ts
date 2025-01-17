@@ -251,6 +251,9 @@ ProjectEndpoint.post(
         JSON.parse(
           existingProject.project_files_meta as string,
         ) as ProjectFilesMeta,
+        {
+          UPDATE_PROJECT_APP_NAME: true,
+        },
       )
         .unzip()
         .then((deploymentInstance) => deploymentInstance.processFiles())

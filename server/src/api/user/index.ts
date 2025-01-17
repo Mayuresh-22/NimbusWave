@@ -83,8 +83,8 @@ UserEndpoint.get("/user/dashboard", async (c) => {
   // parse json string back to object
   userDashboardResult.results = userDashboardResult.results.map((result) => {
     result.deployments = JSON.parse(result.deployments as string);
-    // @ts-expect-error deployment_id can be null
     result.deployments =
+      // @ts-expect-error deployment_id can be null
       result.deployments[0].deployment_id === null ? [] : result.deployments;
     return result;
   });
