@@ -47,21 +47,29 @@ export default function ChatPage() {
 
   const validateProjectDetails = (): boolean => {
     // validate project details
-    if (!projectName.trim()) {
-      setAlert({ type: "error", message: "Project name is required." });
-      return false;
-    }
-    if (!projectFramework.trim()) {
-      setAlert({ type: "error", message: "Project framework is required." });
-      return false;
-    }
-    if (!projectDescription.trim()) {
-      setAlert({ type: "error", message: "Project description is required." });
-      return false;
-    }
-    if (!zipProjectFiles) {
-      setAlert({ type: "error", message: "Project files are required." });
-      return false;
+    try {
+      if (!projectName || !projectName.trim()) {
+        setAlert({ type: "error", message: "Project name is required." });
+        throw new Error("Project name is null or empty");
+      }
+      if (!projectFramework || !projectFramework.trim()) {
+        setAlert({ type: "error", message: "Project framework is required." });
+        throw new Error("Project framework is null or empty");
+      }
+      if (!projectDescription || !projectDescription.trim()) {
+        setAlert({
+          type: "error",
+          message: "Project description is required.",
+        });
+        throw new Error("Project description is null or empty");
+      }
+      if (!zipProjectFiles) {
+        setAlert({ type: "error", message: "Project files are required." });
+        throw new Error("Project files are null or empty");
+      }
+    } catch (error) {
+      console.log("Error in validating project details", error);
+      throw error;
     }
     return true;
   };
@@ -104,14 +112,24 @@ export default function ChatPage() {
       if response.tool is not null
     */
     if (response.tool) {
-      // execute the tool command
-      const toolResponse = tools[response.tool](response.value);
+      console.log(response.tool);
+
+      try {
+        // execute the tool command
+        const toolResponse = await tools[response.tool](response.value);
+      } catch (error) {
+        // send error message to the ai
+        setInput("Error >> " + error.message);
+      }
     }
   };
 
   const initDeployment = async () => {
-    if (!validateProjectDetails()) {
-      return;
+    try {
+      validateProjectDetails();
+    } catch (error) {
+      console.log("Catching error in initDeployment", error);
+      throw error;
     }
 
     // make request to server to start deployment
@@ -233,6 +251,15 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // runs on tools error
+  useEffect(() => {
+    (async () => {
+      if (input.startsWith("Error >>")) {
+        await handleSend(true);
+      }
+    })();
+  }, [input]);
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
