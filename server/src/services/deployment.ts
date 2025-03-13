@@ -75,9 +75,15 @@ class DeploymentService {
     this.zipProjectFiles = zipProjectFiles;
     this.projectMeta = projectMeta;
     this.storedProjectFilesDict = storedProjectFilesDict ?? {};
-    this.PROJECT_APP_NAME = flags.UPDATE_PROJECT_APP_NAME
-      ? normalizeProjectName(projectMeta.project_name)
-      : (projectMeta.project_app_name as string);
+    /*
+      We are updating the project app name (url slug) only if the UPDATE_PROJECT_APP_NAME flag is set
+      AND project_app_name variable is not set in database (means its a first deployment)
+      Bug Fixed: app_name changes on every deployment
+    */
+    this.PROJECT_APP_NAME =
+      flags.UPDATE_PROJECT_APP_NAME && !projectMeta?.project_app_name
+        ? normalizeProjectName(projectMeta.project_name)
+        : (projectMeta.project_app_name as string);
     this.log(`DeploymentService initialized for project ${this.projectId}`);
   }
 
@@ -118,6 +124,17 @@ class DeploymentService {
 
   /**
    * Processes the project files and uploads them to cloudinary
+   *
+   * How it works?
+   * * Iterates through the zip entries
+   * * Calculates the SHA256 hash of the file buffer
+   * * Checks if the file has changed or is new
+   * * Uploads the file to cloudinary if it has changed
+   * * Updates the project file paths with new cloudinary URLs and store it in
+   *   the storedProjectFilesDict (its value is populated from the database)
+   * * Processes the index.html file and updates the project file paths with new
+   *   cloudinary URLs
+   * * Now take the unChangedFilePathArray and update the unchanged project files
    * @returns {Promise<DeploymentService>} Deployment service instance
    * @throws {Error} Error if processing fails
    */
