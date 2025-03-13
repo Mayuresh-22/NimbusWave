@@ -46,7 +46,7 @@ export const DEPLOYMENT_NOT_FOUND_HTML = `<!DOCTYPE html>
             background-color: #fff;
             color: #000;
             text-decoration: none;
-            padding: 12px 24px;
+            padding: 8px 20px;
             border-radius: 5px;
             font-size: 16px;
             font-weight: 500;
@@ -62,7 +62,8 @@ export const DEPLOYMENT_NOT_FOUND_HTML = `<!DOCTYPE html>
         <h1>Deployment Not Found</h1>
         <p>We couldn't find the deployment you're looking for. It may have been deleted or never existed.</p>
         <div class="error-code">Error Code: DEPLOYMENT_NOT_FOUND</div>
-        <a href="/" class="button">Return to NimbusWave</a>
+        <br>
+        <a href="http://localhost:5173/" class="button">Return to NimbusWave</a>
     </div>
 </body>
 </html>`;
