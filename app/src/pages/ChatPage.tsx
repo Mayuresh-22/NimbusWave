@@ -1,10 +1,18 @@
-import { Send, Upload, Stars, UserRound, FileArchive } from "lucide-react";
+import {
+  Send,
+  Upload,
+  Stars,
+  UserRound,
+  FileArchive,
+  Trash2,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router";
 import Alert from "../components/common/Alert";
+import DeleteConfirmDialog from "../components/common/Dialog";
 import { ScreenLoader } from "../components/common/Loader";
-import deploy from "../services/deploy";
+import projectService from "../services/project";
 import { setProject } from "../store/projectSlice";
 import type { RootState } from "../store/store";
 
@@ -14,7 +22,7 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const { projectId } = useParams() as { projectId: string };
+  const { projectId } = useParams() as { projectId: string }; // get project id from URL
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -24,6 +32,7 @@ export default function ChatPage() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [showDialogBox, setShowDialogBox] = useState<boolean>(false);
   const [input, setInput] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const project = useSelector((state: RootState) => state.project.project);
@@ -86,7 +95,7 @@ export default function ChatPage() {
     }
     setInput("");
 
-    const response = await deploy.sendMessage(
+    const response = await projectService.sendMessage(
       project?.projectID as string,
       project?.chatId as string,
       input,
@@ -113,13 +122,12 @@ export default function ChatPage() {
     */
     if (response.tool) {
       console.log(response.tool);
-
       try {
         // execute the tool command
-        const toolResponse = await tools[response.tool](response.value);
+        await tools[response.tool](response.value);
       } catch (error) {
         // send error message to the ai
-        setInput("Error >> " + error.message);
+        setInput("Error: " + error.message);
       }
     }
   };
@@ -133,7 +141,7 @@ export default function ChatPage() {
     }
 
     // make request to server to start deployment
-    const deployResponse = await deploy.deployProject(
+    const deployResponse = await projectService.deployProject(
       project?.projectID as string,
       projectName,
       projectFramework,
@@ -150,6 +158,14 @@ export default function ChatPage() {
     }
     setProjectStatus(1);
     setAlert({ type: "success", message: "Project deployed successfully!" });
+  };
+
+  const tools: { [key: string]: ((value: any) => void) | (() => void) } = {
+    saveProjectName: setProjectName,
+    saveProjectFramework: setProjectFramework,
+    saveProjectDescription: setProjectDescription,
+    saveProjectStatus: setProjectStatus,
+    initDeployment: initDeployment,
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -183,20 +199,12 @@ export default function ChatPage() {
     fileInputRef.current?.click();
   };
 
-  const tools: { [key: string]: ((value: any) => void) | (() => void) } = {
-    saveProjectName: setProjectName,
-    saveProjectFramework: setProjectFramework,
-    saveProjectDescription: setProjectDescription,
-    saveProjectStatus: setProjectStatus,
-    initDeployment: initDeployment,
-  };
-
   useEffect(() => {
     // create a new project/fetch project details
     (async () => {
       setScreenLoader(true);
       if (!projectId) {
-        const response = await deploy.createNewProject();
+        const response = await projectService.createNewProject();
         if (!response) {
           setAlert({
             type: "error",
@@ -216,7 +224,7 @@ export default function ChatPage() {
         navigate(`${response.data.project_id}`);
       } else if (projectId) {
         console.log("fetch project");
-        const response = await deploy.getProjecrt(projectId);
+        const response = await projectService.getProjecrt(projectId);
         if (!response) {
           setAlert({
             type: "error",
@@ -255,7 +263,7 @@ export default function ChatPage() {
   // runs on tools error
   useEffect(() => {
     (async () => {
-      if (input.startsWith("Error >>")) {
+      if (input.startsWith("Error:")) {
         await handleSend(true);
       }
     })();
@@ -268,12 +276,26 @@ export default function ChatPage() {
         <ScreenLoader message="Initializing deployment..." />
       ) : (
         <main className="flex-1 pt-16 bg-gradient-to-r from-black via-gray-950">
+          {showDialogBox && (
+            <DeleteConfirmDialog
+              title="Are you sure?"
+              content="Do you really want to delete this project? This action cannot be undone."
+              onOk={() => {}}
+              onClose={() => setShowDialogBox(false)}
+            />
+          )}
           <div className="container max-w-4xl mx-auto px-4 h-[calc(100vh-4rem)] flex flex-col">
             {/* Project name */}
-            <div className="py-4 border-b border-gray-900">
+            <div className="flex py-4 justify-between">
               <h1 className="text-xl font-semibold">
-                Project name: {projectName}
+                Project Name: {projectName}
               </h1>
+              <div
+                onClick={() => setShowDialogBox(true)}
+                className="bg-red-500 group text-white p-1 rounded-lg cursor-pointer"
+              >
+                <Trash2 size={16} />
+              </div>
             </div>
 
             {/* Upload area */}
