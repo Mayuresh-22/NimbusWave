@@ -1,6 +1,6 @@
 import BaseService from "./base";
 
-class DeploymentService extends BaseService {
+class ProjectService extends BaseService {
   constructor() {
     super();
   }
@@ -68,4 +68,4 @@ class DeploymentService extends BaseService {
   }
 }
 
-export default new DeploymentService();
+export default new ProjectService();
