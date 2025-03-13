@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "nimbuswave_server",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
