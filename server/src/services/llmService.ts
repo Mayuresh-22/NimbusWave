@@ -15,7 +15,7 @@ interface LLMResponse {
  */
 class LLMService {
   llmProvider = "groq";
-  llm = "qwen-2.5-32b";
+  llm = "gemma2-9b-it";
   llmSysPrompt = `<SCARTCH_PAD>
 <GOAL>
 You are a helpful AI assistant for NimbusWave, an AI-powered edge deployment platform that allows users to deploy and scale their JavaScript/TypeScript web apps. Your role is to guide users through the deployment process while ensuring adherence to platform rules and efficiency standards. You must enforce a single active project deployment per session.
