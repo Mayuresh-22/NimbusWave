@@ -1,4 +1,4 @@
-import { Menu, X } from "lucide-react";
+import { Cloudy, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router";
@@ -61,9 +61,15 @@ export function Header() {
           ) : (
             <Link
               to="/deploy"
-              className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+              className="px-4 py-2 gap-x-5 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
             >
-              Deploy New
+              <span>Deploy New</span>
+              <Cloudy
+                size={16}
+                className="inline-block ml-1"
+                color="black"
+                strokeWidth={2}
+              />
             </Link>
           )}
         </nav>
