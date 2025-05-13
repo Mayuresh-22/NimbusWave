@@ -33,10 +33,7 @@ export const ONBOARD: NavbarLink = {
 };
 
 export const NAVBAR_LINKS: { [key: string]: NavbarLink[] } = {
-  "/": [PRICING, DOCS],
-  "/dashboard": [DOCS, SETTINGS],
-  "/onboard": [PRICING, DOCS],
-  "/deploy": [DOCS],
-  "/docs": [DOCS],
-  "/settings": [SETTINGS, DOCS],
+  "/dashboard": [],
+  "/onboard": [],
+  "/deploy": [],
 };
