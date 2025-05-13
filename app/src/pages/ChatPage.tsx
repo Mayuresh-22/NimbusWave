@@ -12,6 +12,7 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import Alert from "../components/common/Alert";
 import DeleteConfirmDialog from "../components/common/Dialog";
 import { ScreenLoader } from "../components/common/Loader";
+import ToastComponent from "../components/common/Toast";
 import projectService from "../services/project";
 import { setProject } from "../store/projectSlice";
 import type { RootState } from "../store/store";
@@ -271,7 +272,12 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
-      {alert && <Alert type={alert.type} message={alert.message} />}
+      {alert && (
+        <ToastComponent
+          title={alert.type === "success" ? "Success" : "Error"}
+          message={alert.message}
+        />
+      )}
       {screenLoader ? (
         <ScreenLoader message="Initializing deployment..." />
       ) : (
@@ -341,7 +347,7 @@ export default function ChatPage() {
             </div>
 
             {/* Chat area */}
-            <div className="flex-1 overflow-y-auto py-4 space-y-4">
+            <div className="flex-1 overflow-y-scroll no-scrollbar py-4 space-y-4">
               {/* Messages */}
               {messages.map((message, index) => (
                 <div
