@@ -20,6 +20,7 @@ wrangler.toml
 .env
 .env.production
 .dev.vars
+.env.*
 
 # logs
 logs/
@@ -32,3 +33,5 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+.mastra
