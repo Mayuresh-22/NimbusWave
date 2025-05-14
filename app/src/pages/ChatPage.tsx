@@ -290,7 +290,7 @@ export default function ChatPage() {
               onClose={() => setShowDialogBox(false)}
             />
           )}
-          <div className="container max-w-4xl mx-auto px-4 h-[calc(100vh-4rem)] flex flex-col">
+          <div className="container max-w-4xl mx-auto px-14 h-[calc(100vh-4rem)] flex flex-col">
             {/* Project name */}
             <div className="flex py-4 justify-between">
               <h1 className="text-xl font-semibold">

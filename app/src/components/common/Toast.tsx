@@ -21,7 +21,7 @@ const ToastComponent = ({ title, message }: ToastProps) => {
       <Toast.Root
         open={open}
         onOpenChange={setOpen}
-        className="bg-gray-900 text-white p-4 rounded-lg shadow-lg"
+        className="bg-gray-900 border border-gray-600 text-white p-4 rounded-lg shadow-lg"
       >
         <div className="flex items-center justify-between">
           {title && (

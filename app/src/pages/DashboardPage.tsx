@@ -66,44 +66,42 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-semibold mb-4">
                 Recent Deployments
               </h2>
-              <div className="min-h-[650px] max-h-[650px] rounded-lg border border-gray-800 overflow-y-auto overflow-x-hidden">
-                <div className="p-6">
-                  <div className="space-y-5">
-                    {recentDeployments.length > 0 ? (
-                      recentDeployments?.map((deployment) => (
-                        <div
-                          key={deployment.deployment_id}
-                          className="flex items-center justify-between hover:bg-gray-900 transition-all p-4 rounded-lg"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className={`w-2 h-2 rounded-full ${
-                                deployment.deployment_status == 1
-                                  ? "bg-green-400"
-                                  : "bg-red-400"
-                              }`}
-                            />
-                            <div>
-                              <p className="font-normal text-gray-400">
-                                {deployment.project_name}
-                              </p>
-                              <p className="font-medium">
-                                {deployment.deployment_id}
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                {deployment.created_at}
-                              </p>
-                            </div>
+              <div className="min-h-[650px] max-h-[650px] p-3 rounded-lg border border-gray-800 overflow-y-auto overflow-x-hidden">
+                <div className="space-y-5">
+                  {recentDeployments.length > 0 ? (
+                    recentDeployments?.map((deployment) => (
+                      <div
+                        key={deployment.deployment_id}
+                        className="flex items-center justify-between hover:bg-gray-900 transition-all p-4 rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              deployment.deployment_status == 1
+                                ? "bg-green-400"
+                                : "bg-red-400"
+                            }`}
+                          />
+                          <div>
+                            <p className="font-normal text-gray-400">
+                              {deployment.project_name}
+                            </p>
+                            <p className="font-medium">
+                              {deployment.deployment_id}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {deployment.created_at}
+                            </p>
                           </div>
-                          <ChevronRight size={16} className="text-gray-400" />
                         </div>
-                      ))
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-400">No recent deployments</p>
+                        <ChevronRight size={16} className="text-gray-400" />
                       </div>
-                    )}
-                  </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-gray-400">No recent deployments</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -111,9 +109,9 @@ export default function DashboardPage() {
             {/* Active Projects */}
             <div>
               <h2 className="text-2xl font-semibold mb-4">Your Projects</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[650px] max-h-[650px] p-3 overflow-y-auto no-scrollbar overflow-x-hidden rounded-lg border border-gray-800">
-                {projects.length > 0 ? (
-                  projects?.map((project) => (
+              {projects.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[650px] max-h-[650px] p-3 overflow-y-auto no-scrollbar overflow-x-hidden rounded-lg border border-gray-800">
+                  {projects?.map((project) => (
                     <div
                       key={project.project_id}
                       className="rounded-lg p-6 border border-gray-800 hover:border-gray-700 hover:bg-gray-900 transition-all hover:scale-105"
@@ -163,13 +161,13 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-400">No active projects</p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-start justify-center h-full gap-6 min-h-[650px] max-h-[650px] p-3 overflow-y-auto no-scrollbar overflow-x-hidden rounded-lg border border-gray-800">
+                  <p className="text-gray-400">No active projects</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
