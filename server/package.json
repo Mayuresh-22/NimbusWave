@@ -6,7 +6,12 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "@ai-sdk/cerebras": "^0.2.14",
+    "@ai-sdk/groq": "^1.2.9",
     "@hono/zod-validator": "^0.4.2",
+    "@mastra/core": "^0.9.4",
+    "@mastra/libsql": "^0.0.4",
+    "@mastra/memory": "^0.3.4",
     "@supabase/supabase-js": "^2.47.10",
     "adm-zip": "^0.5.16",
     "groq-sdk": "^0.9.1",
