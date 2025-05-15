@@ -13,6 +13,9 @@ SUPABASE_URL="your_supabase_project_url"
 # Format: string starting with 'gsk_', required
 GROQ_API_KEY="your_groq_api_key_here"
 
+# Cerebras API Configuration
+CEREBRAS_API_KEY="your_cerebras_api_key_here" 
+
 # Cloudinary Configuration
 # Format: string, required
 CLOUDINARY_CLOUD_NAME="your_cloud_name"
