@@ -56,9 +56,6 @@ export default function ChatPage() {
   ]);
   const [zipProjectFiles, setZipProjectFiles] = useState<File | null>(null);
   const [projectName, setProjectName] = useState<string>("");
-  const [projectFramework, setProjectFramework] = useState<string>("");
-  const [projectDescription, setProjectDescription] = useState<string>("");
-  const [projectStatus, setProjectStatus] = useState<0 | 1>(0);
   const [screenLoader, setScreenLoader] = useState(true);
 
   const scrollToBottom = () => {
@@ -106,9 +103,6 @@ export default function ChatPage() {
           return;
         }
         setProjectName(response.data.project_name);
-        setProjectFramework(response.data.project_framework);
-        setProjectDescription(response.data.project_description);
-        setProjectStatus(response.data.project_status);
         setMessageArray((prevMessages) => [
           ...prevMessages,
           ...(response.data.chat_context

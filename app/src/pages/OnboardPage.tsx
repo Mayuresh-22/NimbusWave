@@ -80,13 +80,9 @@ export default function OnboardPage() {
     } else if (location.search === "?complete_signup=true") {
       (async () => {
         const userObj = await supabase.getUser();
-        const userResponse = await user.createUser(
-          userObj?.id as string,
-          userObj?.email as string,
-          {
-            name: userObj?.user_metadata?.name,
-          },
-        );
+        await user.createUser(userObj?.id as string, userObj?.email as string, {
+          name: userObj?.user_metadata?.name,
+        });
         await supabase.signOut();
         navigate("?onboard_complete=true");
       })();
