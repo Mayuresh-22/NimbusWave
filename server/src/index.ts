@@ -9,16 +9,12 @@ import AuthMiddleware from "./middlewares/auth";
   This is the custom binding interface to include the .dev.vars
   that extends the CloudflareBindings interface.
 */
-export interface Bindings extends CloudflareBindings {
-  GROQ_API_KEY: string;
-  SUPABASE_URL: string;
-  SUPABASE_ANON_KEY: string;
-}
+export interface Bindings extends CloudflareBindings {}
 
 /*
   This is the main Hono instance
 */
-const server = new Hono<{ Bindings: Bindings }>();
+const server = new Hono<{ Bindings: CloudflareBindings }>();
 
 /*
   This middlewares will be applied to all routes.
