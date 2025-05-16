@@ -34,7 +34,18 @@ cd NimbusWave
 # Install dependencies
 npm install
 
-# Start development server for app & server
+# Make sure you add all the environment variables in
+# /server/.dev.vars.example and rename to .dev.vars
+# same for /app/.env.example
+
+# Install app dependencies
+cd /app
+npm install
+npm run dev
+
+# Install server dependencies
+cd /server
+npm install
 npm run dev
 ```
 
