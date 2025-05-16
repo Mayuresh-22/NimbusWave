@@ -4,10 +4,13 @@ import {
   LockIcon,
   LockKeyholeOpen,
   ExternalLink,
+  Rocket,
+  Cloudy,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router";
+import { setProjects } from "../store/dashboardSlice";
 import type { RootState } from "../store/store";
 
 export default function DashboardPage() {
@@ -25,34 +28,37 @@ export default function DashboardPage() {
     | null
   >(null);
 
-  // useEffect(() => {
-  //   setRecentDeployments(dashboardVars.deployments);
-  //   setProjects(dashboardVars.projects);
-  //   setStats([
-  //     {
-  //       label: "Total Projects",
-  //       value: dashboardVars.numOfProjects,
-  //       icon: Rocket,
-  //     },
-  //   ]);
-  // }, [location.pathname]);
-  console.log("Projects", recentDeployments);
+  useEffect(() => {
+    setProjects(dashboardVars.projects);
+    setStats([
+      {
+        label: "Total Projects",
+        value: dashboardVars.projects.length,
+        icon: Rocket,
+      },
+      {
+        label: "Total Deployments",
+        value: dashboardVars.deployments.length,
+        icon: Cloudy,
+      },
+    ]);
+  }, [location.pathname, dashboardVars.projects, dashboardVars.deployments]);
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       <main className="flex-1 pt-16">
         <div className="container mx-auto px-4 py-8">
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-min mb-8">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-min mb-8">
             {/* Stats Grid */}
             {stats?.map((stat, index) => (
               <div
                 key={index}
-                className="bg-gray-900 rounded-lg p-6 border border-gray-800 hover:border-gray-700 transition-colors"
+                className="max-w-sm rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-gray-400">{stat.label}</p>
-                    <p className="text-2xl font-semibold mt-1">{stat.value}</p>
+                    <p className="text-xs text-gray-400">{stat.label}</p>
+                    <p className="text-xl font-semibold mt-1">{stat.value}</p>
                   </div>
                   <stat.icon className="h-6 w-6 text-gray-400" />
                 </div>
@@ -63,9 +69,7 @@ export default function DashboardPage() {
           <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
             {/* Recent Deployments */}
             <div>
-              <h2 className="text-2xl font-semibold mb-4">
-                Recent Deployments
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">Recent Deployments</h2>
               <div className="min-h-[650px] max-h-[650px] p-3 rounded-lg border border-gray-800 overflow-y-auto overflow-x-hidden">
                 <div className="space-y-5">
                   {recentDeployments.length > 0 ? (
@@ -83,13 +87,13 @@ export default function DashboardPage() {
                             }`}
                           />
                           <div>
-                            <p className="font-normal text-gray-400">
+                            <p className="text-sm text-gray-400">
                               {deployment.project_name}
                             </p>
-                            <p className="font-medium">
+                            <p className="text-base font-medium">
                               {deployment.deployment_id}
                             </p>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-xs text-gray-400">
                               {deployment.created_at}
                             </p>
                           </div>
@@ -108,18 +112,18 @@ export default function DashboardPage() {
 
             {/* Active Projects */}
             <div>
-              <h2 className="text-2xl font-semibold mb-4">Your Projects</h2>
+              <h2 className="text-xl font-semibold mb-4">Your Projects</h2>
               {projects.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[650px] max-h-[650px] p-3 overflow-y-auto no-scrollbar overflow-x-hidden rounded-lg border border-gray-800">
                   {projects?.map((project) => (
                     <div
                       key={project.project_id}
-                      className="rounded-lg p-6 border border-gray-800 hover:border-gray-700 hover:bg-gray-900 transition-all hover:scale-105"
+                      className="max-h-40 rounded-lg p-6 border border-gray-800 hover:border-gray-700 hover:bg-gray-900 transition-all hover:scale-105"
                     >
                       <div className="flex items-center justify-between mb-4">
                         <Link
                           to={`/deploy/${project.project_id}`}
-                          className="font-medium text-lg hover:underline"
+                          className="font-medium text-base hover:underline"
                         >
                           {project.project_name}
                         </Link>
@@ -138,7 +142,7 @@ export default function DashboardPage() {
                           />
                         </div>
                       </div>
-                      <div className="flex justify-normal space-x-3 text-sm text-gray-400">
+                      <div className="flex justify-normal space-x-3 text-xs text-gray-400">
                         <div className="flex items-center">
                           {project.project_type === "private" ? (
                             <>
@@ -165,7 +169,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="flex items-start justify-center h-full gap-6 min-h-[650px] max-h-[650px] p-3 overflow-y-auto no-scrollbar overflow-x-hidden rounded-lg border border-gray-800">
-                  <p className="text-gray-400">No active projects</p>
+                  <p className="text-sm text-gray-400">No active projects</p>
                 </div>
               )}
             </div>

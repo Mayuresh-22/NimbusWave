@@ -23,18 +23,18 @@ export default function HomePage() {
       <main className="flex-1 pt-16">
         {/* Hero section */}
         <section className="container mx-auto px-4 py-20 text-center bg-gradient-to-r from-black via-gray-900 to-black relative overflow-hidden">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 relative">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 relative">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-300 to-gray-500">
               Deploy at the Speed of Thought
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto relative z-10">
+          <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto relative z-10">
             Zero-config AI-powered edge deployment platform that takes your
             JS/TS apps from local to global in seconds
           </p>
           <button
             onClick={() => navigateTo(DASHBOARD.path)}
-            className="inline-flex items-center px-6 py-3 text-base font-medium text-black bg-white rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors relative z-10"
+            className="inline-flex items-center px-6 py-3 text-sm font-medium text-black bg-white rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors relative z-10"
           >
             Get Started Quickly
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -44,7 +44,7 @@ export default function HomePage() {
         {/* Process section */}
         <section className="container mx-auto px-4 py-16 border-t border-gray-900 rounded-3xl">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
+            <h2 className="text-2xl font-bold text-center mb-12">
               How It Works
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -75,8 +75,8 @@ export default function HomePage() {
                   <div className="w-16 h-16 rounded-full bg-gray-900 flex items-center justify-center group-hover:bg-gray-800 transition-colors">
                     <step.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold">{step.title}</h3>
-                  <p className="text-gray-400 group-hover:text-gray-300 transition-colors">
+                  <h3 className="text-lg font-semibold">{step.title}</h3>
+                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
                     {step.description}
                   </p>
                 </div>
@@ -92,8 +92,8 @@ export default function HomePage() {
               <div className="p-4 bg-gray-800 rounded-full">
                 <Upload className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold">Upload Your Project</h2>
-              <p className="text-gray-400 text-center">
+              <h2 className="text-xl font-semibold">Upload Your Project</h2>
+              <p className="text-sm text-gray-400 text-center">
                 Drag and drop your dist folder or click to browse
               </p>
               <button
