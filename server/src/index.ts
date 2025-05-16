@@ -40,7 +40,7 @@ server.use(
   cors({
     origin: "*",
     allowHeaders: ["Authorization", "Content-Type", "Accept"],
-    allowMethods: ["POST", "GET", "OPTIONS"],
+    allowMethods: ["POST", "GET", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     credentials: true,
   }),
