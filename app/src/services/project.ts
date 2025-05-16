@@ -28,14 +28,30 @@ class ProjectService extends BaseService {
     }
   }
 
-  async sendMessage(projectId: string, chatId: string, message: string) {
+  async sendMessage(
+    message: string,
+    file: File,
+    projectId: string,
+    chatId: string,
+  ) {
     try {
-      const response = await this.server.post("/api/ai/chat", {
-        message,
-        project_id: projectId,
-        chat_id: chatId,
-      });
-      return response.data;
+      const response = await this.server.post(
+        "/api/ai/chat",
+        {
+          file,
+          message,
+          project_id: projectId,
+          chat_id: chatId,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "stream",
+          adapter: "fetch",
+        },
+      );
+      return response.data as ReadableStream<Uint8Array>;
     } catch (error) {
       return null;
     }
