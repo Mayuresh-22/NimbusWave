@@ -5,11 +5,11 @@ import {
   UserRound,
   FileArchive,
   Trash2,
+  Pickaxe,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router";
-import Alert from "../components/common/Alert";
 import DeleteConfirmDialog from "../components/common/Dialog";
 import { ScreenLoader } from "../components/common/Loader";
 import ToastComponent from "../components/common/Toast";
@@ -18,8 +18,18 @@ import { setProject } from "../store/projectSlice";
 import type { RootState } from "../store/store";
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "tool";
   content: string;
+  toolCallId?: string;
+  toolName?: string;
+  toolResult?: string;
+}
+
+interface ToolResponse {
+  toolCallId?: string;
+  toolName?: string;
+  args?: unknown;
+  result?: unknown;
 }
 
 export default function ChatPage() {
@@ -34,10 +44,10 @@ export default function ChatPage() {
     message: string;
   } | null>(null);
   const [showDialogBox, setShowDialogBox] = useState<boolean>(false);
-  const [input, setInput] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
+  const [message, setMessage] = useState("");
   const project = useSelector((state: RootState) => state.project.project);
-  const [messages, setMessages] = useState<Message[]>([
+  const [isDragging, setIsDragging] = useState(false);
+  const [messageArray, setMessageArray] = useState<Message[]>([
     {
       role: "assistant",
       content:
@@ -55,150 +65,9 @@ export default function ChatPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const validateProjectDetails = (): boolean => {
-    // validate project details
-    try {
-      if (!projectName || !projectName.trim()) {
-        setAlert({ type: "error", message: "Project name is required." });
-        throw new Error("Project name is null or empty");
-      }
-      if (!projectFramework || !projectFramework.trim()) {
-        setAlert({ type: "error", message: "Project framework is required." });
-        throw new Error("Project framework is null or empty");
-      }
-      if (!projectDescription || !projectDescription.trim()) {
-        setAlert({
-          type: "error",
-          message: "Project description is required.",
-        });
-        throw new Error("Project description is null or empty");
-      }
-      if (!zipProjectFiles) {
-        setAlert({ type: "error", message: "Project files are required." });
-        throw new Error("Project files are null or empty");
-      }
-    } catch (error) {
-      console.log("Error in validating project details", error);
-      throw error;
-    }
-    return true;
-  };
-
-  const handleSend = async (triggeredByUser: boolean = true) => {
-    if (!input.trim()) {
-      return;
-    }
-    if (triggeredByUser) {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: "user", content: input },
-      ]);
-    }
-    setInput("");
-
-    const response = await projectService.sendMessage(
-      project?.projectID as string,
-      project?.chatId as string,
-      input,
-    );
-    console.log(response);
-
-    if (!response) {
-      setAlert({
-        type: "error",
-        message: "Failed to send message. Please try again later.",
-      });
-      return;
-    } else if (response.status === "error") {
-      setAlert({ type: "error", message: response.message });
-      return;
-    }
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: "assistant", content: response.message },
-    ]);
-    /*
-      start executing the tool
-      if response.tool is not null
-    */
-    if (response.tool) {
-      console.log(response.tool);
-      try {
-        // execute the tool command
-        await tools[response.tool](response.value);
-      } catch (error) {
-        // send error message to the ai
-        setInput("Error: " + error.message);
-      }
-    }
-  };
-
-  const initDeployment = async () => {
-    try {
-      validateProjectDetails();
-    } catch (error) {
-      console.log("Catching error in initDeployment", error);
-      throw error;
-    }
-
-    // make request to server to start deployment
-    const deployResponse = await projectService.deployProject(
-      project?.projectID as string,
-      projectName,
-      projectFramework,
-      projectDescription,
-      zipProjectFiles as File,
-    );
-
-    if (!deployResponse) {
-      setAlert({
-        type: "error",
-        message: "Failed to deploy project. Please try again later.",
-      });
-      return;
-    }
-    setProjectStatus(1);
-    setAlert({ type: "success", message: "Project deployed successfully!" });
-  };
-
-  const tools: { [key: string]: ((value: any) => void) | (() => void) } = {
-    saveProjectName: setProjectName,
-    saveProjectFramework: setProjectFramework,
-    saveProjectDescription: setProjectDescription,
-    saveProjectStatus: setProjectStatus,
-    initDeployment: initDeployment,
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const zipProjectFiles = e.dataTransfer.files?.[0];
-    console.log(zipProjectFiles);
-    setZipProjectFiles(zipProjectFiles);
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const zipProjectFiles = e.target.files?.[0];
-    console.log(zipProjectFiles);
-    if (!zipProjectFiles) {
-      return;
-    }
-    setZipProjectFiles(zipProjectFiles);
-  };
-
-  const handleFileBrowse = () => {
-    fileInputRef.current?.click();
-  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageArray]);
 
   useEffect(() => {
     // create a new project/fetch project details
@@ -240,7 +109,7 @@ export default function ChatPage() {
         setProjectFramework(response.data.project_framework);
         setProjectDescription(response.data.project_description);
         setProjectStatus(response.data.project_status);
-        setMessages((prevMessages) => [
+        setMessageArray((prevMessages) => [
           ...prevMessages,
           ...(response.data.chat_context
             ? JSON.parse(response.data.chat_context)
@@ -257,18 +126,170 @@ export default function ChatPage() {
     })();
   }, [projectId, location.pathname]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
-  // runs on tools error
-  useEffect(() => {
-    (async () => {
-      if (input.startsWith("Error:")) {
-        await handleSend(true);
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const zipProjectFiles = e.dataTransfer.files?.[0];
+    console.log(zipProjectFiles);
+    setZipProjectFiles(zipProjectFiles);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const zipProjectFiles = e.target.files?.[0];
+    console.log(zipProjectFiles);
+    if (!zipProjectFiles) {
+      return;
+    }
+    setZipProjectFiles(zipProjectFiles);
+  };
+
+  const handleFileBrowse = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleSend = async (triggeredByUser: boolean = true) => {
+    if (!message.trim()) {
+      return;
+    }
+    if (triggeredByUser) {
+      setMessageArray((prevMessages) => [
+        ...prevMessages,
+        { role: "user", content: message },
+      ]);
+    }
+    setMessage("");
+
+    const responseStream = await projectService.sendMessage(
+      message,
+      zipProjectFiles as File,
+      project?.projectID as string,
+      project?.chatId as string,
+    );
+
+    if (!responseStream) {
+      setAlert({
+        type: "error",
+        message: "Failed to send message. Please try again later.",
+      });
+      return;
+    }
+
+    const reader = responseStream.getReader();
+    const decoder = new TextDecoder();
+    let chunk: ReadableStreamReadResult<Uint8Array>;
+    let assistantMessage = "";
+    let buffer = "";
+    let isBuffered = false;
+
+    while (!(chunk = await reader.read()).done) {
+      const textChunk = decoder.decode(chunk.value, { stream: true });
+      const lines = textChunk.split("\n").filter(Boolean);
+      let jsonBuffer: ToolResponse | null = null;
+      for (let line of lines) {
+        try {
+          line = line.replace(/^[a-zA-Z0-9]:/, "").trim();
+          // console.log("Step:", line);
+          if (line.startsWith("{") && line.endsWith("}")) {
+            // console.log("JSON:", JSON.parse(line));
+            jsonBuffer = JSON.parse(line);
+          } else if (line.startsWith("{") && !line.endsWith("}")) {
+            buffer += line;
+            isBuffered = true;
+            continue;
+          } else if (isBuffered && line.endsWith("}")) {
+            buffer += line;
+            jsonBuffer = JSON.parse(buffer);
+            isBuffered = false;
+            buffer = "";
+          } else {
+            assistantMessage += line.replace(/^\"/, "").replace(/\"$/, "");
+            setMessageArray((prevMessages) => {
+              const updatedMessages = [...prevMessages];
+              const lastMessage = updatedMessages[updatedMessages.length - 1];
+              if (lastMessage?.role === "assistant") {
+                updatedMessages[updatedMessages.length - 1] = {
+                  ...lastMessage,
+                  content: assistantMessage,
+                };
+              } else {
+                updatedMessages.push({
+                  role: "assistant",
+                  content: assistantMessage,
+                });
+              }
+              return updatedMessages;
+            });
+            continue;
+          }
+
+          // add tool call message to message array
+          if (!jsonBuffer) {
+            continue;
+          }
+          if (jsonBuffer?.toolCallId && jsonBuffer?.args) {
+            setMessageArray((prevMessages) => [
+              ...prevMessages,
+              {
+                role: "tool",
+                toolName: jsonBuffer?.toolName,
+                content: `Tool call: ${jsonBuffer?.toolCallId}`,
+              },
+            ]);
+            console.log("Tool call appended");
+          } else if (jsonBuffer?.toolCallId && !jsonBuffer?.args) {
+            const toolResultStr = JSON.stringify(jsonBuffer?.result);
+            // update tool call message with result in the message array
+            setMessageArray((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.role === "tool" && msg.toolCallId === jsonBuffer?.toolCallId
+                  ? { ...msg, toolResult: toolResultStr }
+                  : msg,
+              ),
+            );
+            console.log("Tool result appended");
+          }
+        } catch (error) {
+          console.log("Error parsing JSON", error);
+        }
       }
-    })();
-  }, [input]);
+    }
+    console.log("Stream finished");
+  };
+
+  const handleDeleteProject = async () => {
+    try {
+      setShowDialogBox(false);
+      setScreenLoader(true);
+      const response = await projectService.deleteProject(projectId);
+      if (!response) {
+        setAlert({
+          type: "error",
+          message: "Failed to delete the project. Please try again later.",
+        });
+        return;
+      }
+      setAlert({ type: "success", message: "Project deleted successfully!" });
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      setAlert({
+        type: "error",
+        message: "An error occurred while deleting the project.",
+      });
+    } finally {
+      setScreenLoader(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
@@ -286,7 +307,7 @@ export default function ChatPage() {
             <DeleteConfirmDialog
               title="Are you sure?"
               content="Do you really want to delete this project? This action cannot be undone."
-              onOk={() => {}}
+              onOk={handleDeleteProject}
               onClose={() => setShowDialogBox(false)}
             />
           )}
@@ -349,11 +370,11 @@ export default function ChatPage() {
             {/* Chat area */}
             <div className="flex-1 overflow-y-scroll no-scrollbar py-4 space-y-4">
               {/* Messages */}
-              {messages.map((message, index) => (
+              {messageArray.map((message, index) => (
                 <div
                   key={index}
                   className={`flex items-start space-x-3 ${
-                    message.role === "assistant"
+                    message.role === "assistant" || message.role === "tool"
                       ? "justify-start"
                       : "justify-end"
                   }`}
@@ -363,14 +384,34 @@ export default function ChatPage() {
                       <Stars size={16} />
                     </div>
                   )}
+                  {message.role === "tool" && (
+                    <div className="w-8 h-8 rounded-full bg-gray-900 border border-blue-900 flex items-center justify-center">
+                      <Pickaxe size={16} />
+                    </div>
+                  )}
                   <div
-                    className={`max-w-[80%] rounded-xl px-4 py-2 ${
+                    className={`max-w-[80%] px-4 ${
                       message.role === "assistant"
-                        ? "bg-gray-900"
-                        : "bg-gray-300 text-black"
+                        ? "bg-gray-900 rounded-xl py-2"
+                        : message.role === "tool"
+                          ? "py-1 bg-slate-800 rounded-lg group hover:bg-slate-900 border-2 border-blue-900 "
+                          : "py-2 bg-gray-300 text-black rounded-xl"
                     }`}
                   >
-                    {message.content}
+                    {message.role === "tool" && message.toolName && (
+                      <div className="text-sm font-semibold mb-1">
+                        {message.toolName}
+                        <div className="hidden text-xs  whitespace-pre-line text-gray-500 group-hover:block duration-300">
+                          {message.toolResult}
+                        </div>
+                      </div>
+                    )}
+                    {(message.role === "assistant" ||
+                      message.role === "user") && (
+                      <p className="text-sm whitespace-pre-line">
+                        {message.content}
+                      </p>
+                    )}
                   </div>
                   {message.role === "user" && (
                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
@@ -387,15 +428,15 @@ export default function ChatPage() {
               <div className="flex items-center space-x-4">
                 <input
                   type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSend()}
                   placeholder="Let's start deploying your project..."
                   className="flex-1 px-4 py-3 text-sm bg-gray-900 rounded-full border border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent"
                 />
                 <button
                   onClick={() => handleSend()}
-                  disabled={!input.trim()}
+                  disabled={!message.trim()}
                   className="px-4 py-3 text-black bg-white rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send size={16} />
