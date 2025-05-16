@@ -118,60 +118,72 @@ AIEndpoint.post("/chat", zValidator("form", ChatEndpointSchema), async (c) => {
     content: formVars.message,
   });
 
-  agentStream.text.then(async (fullText) => {
-    // persist tool calls and results
-    for await (const chunk of agentStream.fullStream) {
-      if (chunk.type === "tool-call") {
-        contextBuffer.push({
-          role: "tool",
-          content: "",
-          toolCallId: chunk.toolCallId,
-          toolName: chunk.toolName,
-        });
-      } else if (chunk.type === "tool-result") {
-        const toolResultStr = JSON.stringify(chunk.result);
-        const toolCallIndex = contextBuffer.findIndex(
-          (message) => message.toolCallId === chunk.toolCallId,
-        );
-        if (toolCallIndex !== -1) {
-          contextBuffer[toolCallIndex] = {
-            ...contextBuffer[toolCallIndex],
-            toolResult: toolResultStr,
-          };
-        }
-      }
-    }
-
-    await c.env.DB.prepare(
-      "UPDATE chats SET chat_context = ? WHERE chat_id = ?",
-    )
-      .bind(
-        JSON.stringify([
-          ...contextBuffer,
-          { role: "assistant", content: fullText || "Steps completed." },
-        ]),
-        formVars.chat_id,
-      )
-      .run();
-  });
-
   // return agentStream.toDataStreamResponse();
 
   return stream(c, async (readableStreamDefaultWriter) => {
-    c.res.headers.set("Content-Type", "text/event-stream");
-    c.res.headers.set("Cache-Control", "no-cache");
-    c.res.headers.set("Connection", "keep-alive");
-    c.res.headers.set("Transfer-Encoding", "chunked");
-    const reader = agentStream.toDataStream().getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
+    try {
+      c.res.headers.set("Content-Type", "text/event-stream");
+      c.res.headers.set("Cache-Control", "no-cache");
+      c.res.headers.set("Connection", "keep-alive");
+      c.res.headers.set("Transfer-Encoding", "chunked");
+      c.res.headers.set("X-Accel-Buffering", "no");
+      c.res.headers.set("X-Content-Type-Options", "nosniff");
+      c.res.headers.set("X-Frame-Options", "DENY");
+      c.res.headers.set("X-XSS-Protection", "1; mode=block");
+
+      const reader = agentStream.toDataStream().getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        if (value) {
+          await readableStreamDefaultWriter.write(value);
+        }
       }
-      readableStreamDefaultWriter.write(value);
-      readableStreamDefaultWriter.sleep(100);
+
+      // Ensure the `if (done)` block logic is executed after the stream ends
+      const fullText = await agentStream.text;
+      for await (const chunk of agentStream.fullStream) {
+        if (chunk.type === "tool-call") {
+          contextBuffer.push({
+            role: "tool",
+            content: "",
+            toolCallId: chunk.toolCallId,
+            toolName: chunk.toolName,
+          });
+        } else if (chunk.type === "tool-result") {
+          const toolResultStr = JSON.stringify(chunk.result);
+          const toolCallIndex = contextBuffer.findIndex(
+            (message) => message.toolCallId === chunk.toolCallId,
+          );
+          if (toolCallIndex !== -1) {
+            contextBuffer[toolCallIndex] = {
+              ...contextBuffer[toolCallIndex],
+              toolResult: toolResultStr,
+            };
+          }
+        }
+      }
+
+      // Persist the chat context
+      await c.env.DB.prepare(
+        "UPDATE chats SET chat_context = ? WHERE chat_id = ?",
+      )
+        .bind(
+          JSON.stringify([
+            ...contextBuffer,
+            { role: "assistant", content: fullText || "Steps completed." },
+          ]),
+          formVars.chat_id,
+        )
+        .run();
+    } catch (error) {
+      console.error("Error during streaming:", error);
+    } finally {
+      readableStreamDefaultWriter.close();
     }
-    readableStreamDefaultWriter.close();
   });
 });
 export default AIEndpoint;
