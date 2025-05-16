@@ -1,6 +1,8 @@
+import { cerebras } from "@ai-sdk/cerebras";
+import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
 import { Agent } from "@mastra/core/agent";
-import { saveDetailsTool } from "../tools";
+import { deployTool, saveDetailsTool } from "../tools";
 
 export const NimbusWaveAgent = new Agent({
   name: "NimbusWave Agent",
@@ -14,14 +16,15 @@ export const NimbusWaveAgent = new Agent({
     - If the application name isn't in English, please translate it
     - If giving a name with multiple parts (e.g. "My App"), use the most relevant part (e.g. "My")
     - Then ask for the application description
-    - Then ask for the framework (eg: vite-react, react)
+    - Then ask for the framework (vite-react | react)
     - Then ask users to upload their "build/dist" folder
     - Keep responses concise but informative
     
     you have acess to the following tools:
     - saveDetailsTool: to save the details of the application
     - deployTool: to deploy the application on the edge network
-    - getStatusTool: to get the status of the application`,
-  model: groq("llama-3.3-70b-versatile"),
-  tools: { saveDetailsTool },
+    
+    Remember to always save the details of the application before deploying it.`,
+  model: google("gemini-2.0-flash-exp"),
+  tools: { saveDetailsTool, deployTool },
 });
