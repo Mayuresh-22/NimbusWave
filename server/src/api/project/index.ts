@@ -9,26 +9,25 @@ import {
   UserDeploymentCreditsMiddleware,
   UserProjectCreditsMiddleware,
 } from "../../middlewares/userCredits";
-import type { ProjectFilesMeta } from "../../services/deployment";
-import DeploymentService from "../../services/deployment";
 import FRAMEWORK_PROCESSORS from "../../services/frameworks";
 
 interface ProjectDeploymentRequestVars {
   zipFile: File;
   projectId: string;
-  projectName: string;
-  projectDescription: string;
-  projectFramework: string;
+  project_name: string;
+  project_description: string;
+  project_framework: string;
 }
 
-const CreateProjectReqSchema = z.object({
+const ProjectSchema = z.object({
   default: z.boolean(),
+  id: z.string().nonempty().optional(),
   project_name: z.string().nonempty().max(20).optional(),
   project_description: z.string().nonempty().max(100).optional(),
   project_framework: z.string().nonempty().max(10).optional(),
 });
 
-const DeployProjectReqSchema = z.object({
+const ProjectDeploymentReqSchema = z.object({
   file: z
     .instanceof(File)
     .refine(
@@ -71,7 +70,7 @@ ProjectEndpoint.use("/project/deploy", UserDeploymentCreditsMiddleware);
 
 ProjectEndpoint.post(
   "/project",
-  zValidator("json", CreateProjectReqSchema),
+  zValidator("json", ProjectSchema),
   async (c) => {
     const body = await c.req.json();
     /*
@@ -186,157 +185,65 @@ ProjectEndpoint.get("/project", async (c) => {
   );
 });
 
-ProjectEndpoint.post(
-  "/project/deploy",
-  zValidator("form", DeployProjectReqSchema),
-  async (c) => {
-    const body = await c.req.formData();
-    const deploymentReqVars: ProjectDeploymentRequestVars = {
-      zipFile: body.get("file") as File,
-      projectId: body.get("project_id") as string,
-      projectName: body.get("project_name") as string,
-      projectDescription: body.get("project_description") as string,
-      projectFramework: body.get("project_framework") as string,
-    };
+ProjectEndpoint.delete("/project", async (c) => {
+  const { id } = c.req.query();
 
-    // check if the file is a zip file
-    const isValidZipFile =
-      deploymentReqVars.zipFile.type === "application/zip" ||
-      deploymentReqVars.zipFile.type === "application/x-zip-compressed";
-    if (!isValidZipFile) {
-      return c.json(
-        {
-          status: "error",
-          message: "Invalid file type, only zip files are allowed",
-        },
-        400,
-      );
-    }
+  if (!id) {
+    return c.json(
+      {
+        status: "error",
+        message: "Project ID is required",
+      },
+      400,
+    );
+  }
 
-    // check if project exists
-    const existingProject = await c.env.DB.prepare(
-      "SELECT * FROM projects WHERE project_id = ? AND user_id = ?",
-    )
-      .bind(deploymentReqVars.projectId, c.var.user.id)
-      .first();
+  const projectResult = await c.env.DB.prepare(
+    "SELECT project_id FROM projects WHERE project_id = ? AND user_id = ?",
+  )
+    .bind(id, c.var.user.id)
+    .first();
 
-    if (!existingProject) {
-      return c.json(
-        {
-          status: "error",
-          message: "Project not found",
-        },
-        404,
-      );
-    }
-    /*
-      Deployment process starts here this process will be completed synchronously.
-      It make use of chainable methods to process the deployment files.
+  if (!projectResult) {
+    return c.json(
+      {
+        status: "error",
+        message:
+          "Project not found or you do not have permission to delete it.",
+      },
+      404,
+    );
+  }
 
-      Flags used in the deployment process:
-      UPDATE_PROJECT_APP_NAME: update project app name if null (default: true)
-      UPDATE_BASE_NAME: update base name if null (default: false)
-    */
-    try {
-      const deployServiceResult = await new DeploymentService(
-        c,
-        deploymentReqVars.projectId,
-        deploymentReqVars.zipFile,
-        {
-          project_app_name: existingProject.project_app_name,
-          project_name: deploymentReqVars.projectName,
-          project_description: deploymentReqVars.projectDescription,
-          project_framework: deploymentReqVars.projectFramework,
-        },
-        JSON.parse(
-          existingProject.project_files_meta as string,
-        ) as ProjectFilesMeta,
-        {
-          UPDATE_PROJECT_APP_NAME: true,
-        },
-      )
-        .unzip()
-        .then((deploymentInstance) => deploymentInstance.processFiles())
-        .then((deploymentInstance) => deploymentInstance.processIndexHTML())
-        .then((deploymentInstance) => deploymentInstance.finalize());
-      console.log(deployServiceResult.projectFilesDict);
+  const deleteResult = await c.env.DB.batch([
+    c.env.DB.prepare("DELETE FROM projects WHERE project_id = ?").bind(id),
+    c.env.DB.prepare(
+      "UPDATE users SET project_credits = project_credits + 1 WHERE id = ?",
+    ).bind(c.var.user.id),
+  ]);
 
-      /*
-        Insert deployment details into the database & update project details
-        TODO: add value for deployment_url column, construct url in following format:
-        ${c.env.SERVER_BASE_URL}/deployment/${deployServiceResult.deploymentName}
-      */
-      const deployQueryResults = await c.env.DB.batch([
-        c.env.DB.prepare(
-          `INSERT INTO deployments (deployment_id, project_id, 
-        deployment_status, deployment_logs, deployment_size, time_taken) 
-        VALUES (?, ?, 1, ?, ?, ?)`,
-        ).bind(
-          deployServiceResult.deploymentId,
-          deploymentReqVars.projectId,
-          deployServiceResult.log,
-          deployServiceResult.projectSize,
-          deployServiceResult.timeTaken,
-        ),
-        c.env.DB.prepare(
-          `UPDATE projects SET project_name = ?, project_app_name = ?, project_framework = ?, 
-        project_description = ?, project_status = 1, project_size = ?, project_files_meta = ?, entry_file_path = ?, 
-        is_temp = 0 WHERE project_id = ? AND user_id = ?`,
-        ).bind(
-          deploymentReqVars.projectName,
-          deployServiceResult.appName,
-          deploymentReqVars.projectFramework,
-          deploymentReqVars.projectDescription,
-          deployServiceResult.projectSize,
-          deployServiceResult.projectFilesDict,
-          deployServiceResult.deploymentResult.secure_url,
-          deploymentReqVars.projectId,
-          c.var.user.id,
-        ),
-      ]);
-      /*
-        Check if the deployment was successful and the changes were made in the database
-      */
-      deployQueryResults.map((queryResult) => {
-        if (queryResult.success !== true && queryResult.meta.changes !== 1) {
-          return c.json(
-            {
-              status: "error",
-              message: "Project deployment failed",
-              logs: deployServiceResult.log,
-            },
-            500,
-          );
-        }
-      });
+  const failed = deleteResult.some(
+    (queryResult) =>
+      queryResult.success !== true || queryResult.meta.changes === 0,
+  );
 
-      return c.json(
-        {
-          status: "success",
-          message: "Project deployed successfully",
-          data: {
-            deployment_id: deployServiceResult.deploymentId,
-            project_url: `${c.env.SERVER_BASE_URL}/app/${deployServiceResult.appName}`,
-            project_size: deployServiceResult.projectSize,
-            time_taken: deployServiceResult.timeTaken,
-            deployment_logs: deployServiceResult.log,
-          },
-        },
-        200,
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      return c.json(
-        {
-          status: "error",
-          message: "Project deployment failed",
-          logs: errorMessage,
-        },
-        500,
-      );
-    }
-  },
-);
+  if (failed) {
+    return c.json(
+      {
+        status: "error",
+        message: "Failed to delete the project or update credits.",
+      },
+      500,
+    );
+  }
+
+  return c.json(
+    {
+      status: "success",
+      message: "Project deleted successfully, and credits updated.",
+    },
+    200,
+  );
+});
 
 export default ProjectEndpoint;

@@ -82,6 +82,18 @@ class ProjectService extends BaseService {
       return null;
     }
   }
+
+  async deleteProject(projectId: string) {
+    try {
+      const response = await this.server.delete("/api/project", {
+        params: { id: projectId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
 }
 
 export default new ProjectService();
