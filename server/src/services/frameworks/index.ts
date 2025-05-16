@@ -1,6 +1,6 @@
 import ViteReactProcessor from "./vite-react";
 
-const VITE_REACT = "vite_react";
+const VITE_REACT = "vite-react";
 const REACT = "react";
 const VUE = "vue";
 
