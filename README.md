@@ -115,6 +115,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- [Mastra AI](https://mastra.ai/)
 - [Cloudflare Workers](https://workers.cloudflare.com/)
 - [Cloudinary](https://cloudinary.com/)
 - [Hono.js](https://hono.dev/)
