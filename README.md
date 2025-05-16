@@ -8,9 +8,9 @@ NimbusWave is an AI-powered edge deployment platform that helps developers seaml
 
 ## 🌟 Features
 
-- **AI-Guided Deployments**: Intelligent assistant helps you through the entire deployment process
+- **AI-Guided Deployments**: An Intelligent AI Agent helps you through the entire deployment process and deploys your app directly to the edge
 - **Edge-First Architecture**: Built on Cloudflare Workers for optimal performance
-- **Zero Configuration**: Upload your build folder and we handle the rest
+- **Zero Configuration**: Upload your build folder, and we handle the rest
 - **Instant Deployments**: No cold starts, lightning-fast deployments
 - **Global Scale**: Leverage Cloudflare's global network
 - **Framework Agnostic**: Deploy any JavaScript/TypeScript web application
@@ -65,13 +65,14 @@ NimbusWave/
 ## 🛠️ How It Works
 
 1. **Upload**: Users upload their web application's build folder (as a ZIP file)
-2. **Process**: NimbusWave processes the files and uploads them to Cloudinary
+2. **Process**: NimbusWave's AI Agent processes the files and uploads them to Cloudinary
 3. **Deploy**: The application is deployed to Cloudflare's edge network
 4. **Access**: Users receive a unique URL to access their deployed application
 
 ### Technical Implementation
 
-- **Edge Network**: Utilizes Cloudflare Workers for serverless deployment
+- **AI Agent**: NimbusWave's AI Agent is powered by [Mastra.ai](https://mastra.ai/)
+- **Edge Network**: Utilises Cloudflare Workers for serverless deployment
 - **File Storage**: Cloudinary for static asset management
 - **Frontend**: Built with Vite and React for optimal development experience
 - **Backend**: Powered by Hono.js for efficient API handling
