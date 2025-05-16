@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@ai-sdk/cerebras": "^0.2.14",
+    "@ai-sdk/google": "^1.2.18",
     "@ai-sdk/groq": "^1.2.9",
     "@hono/zod-validator": "^0.4.2",
     "@mastra/core": "^0.9.4",
