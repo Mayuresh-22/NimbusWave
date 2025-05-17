@@ -17,12 +17,6 @@ NimbusWave is an AI-powered edge deployment platform that helps developers seaml
 
 ## 🚀 Getting Started
 
-### Try Out Live (Demo login credentials, only for Mastra.ai hackathon judges)
-
-- **Site:** https://nimbuswave.pages.dev/
-- **Email:** example@example.com
-- **Password:** example
-
 ### Prerequisites
 
 - Node.js >= 20.0.0
